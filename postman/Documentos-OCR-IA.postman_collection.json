@@ -1,0 +1,159 @@
+{
+  "info": 
+  {
+    "name": "Documentos OCR + IA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": 
+  [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+
+    {
+      "key": "clienteId",
+      "value": "1"
+    },
+
+    {
+      "key": "validacaoId",
+      "value": "1"
+    }
+  ],
+
+  "item": 
+  [
+    {
+      "name": "Listar clientes",
+      "request": 
+      {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/clientes"
+      }
+    },
+
+    {
+      "name": "Payload de exemplo",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/documentos/exemplo"
+      }
+    },
+
+    {
+      "name": "Enviar comprovante (texto) — APROVADO",
+      "event": 
+      [
+        {
+          "listen": "test",
+          "script": 
+          {
+            "exec": 
+            [
+              "pm.collectionVariables.set('validacaoId', pm.response.json().validacaoId);"
+            ]
+          }
+        }
+      ],
+
+      "request": 
+      {
+        "method": "POST",
+        "header": 
+        [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+
+        "url": "{{baseUrl}}/api/clientes/{{clienteId}}/comprovantes",
+        "body": 
+        {
+          "mode": "raw",
+          "raw": "{\n  \"nomeArquivo\": \"comprovante-residencia.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"conteudoDocumento\": \"CONTA DE ENERGIA\\nEmpresa: Neoenergia Pernambuco\\nTitular: Joao da Silva\\nEndereco: Rua das Flores, 150\\nBairro: Boa Vista\\nCidade: Recife - PE\\nCEP: 50050-000\\nData de emissao: {{dataRecente}}\",\n  \"imagemBase64\": null\n}"
+        }
+      }
+    },
+
+    {
+      "name": "Enviar comprovante antigo — REPROVADO",
+      "request": 
+      {
+        "method": "POST",
+        "header": 
+        [
+  {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+
+        "url": "{{baseUrl}}/api/clientes/{{clienteId}}/comprovantes",
+        "body": 
+        {
+          "mode": "raw",
+          "raw": "{\n  \"nomeArquivo\": \"conta-antiga.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"conteudoDocumento\": \"CONTA DE AGUA\\nTitular: Joao da Silva\\nEndereco: Rua das Flores, 150\\nBairro: Boa Vista\\nCidade: Recife - PE\\nCEP: 50050-000\\nData de emissao: 10/01/2025\",\n  \"imagemBase64\": null\n}"
+        }
+      }
+    },
+
+    {
+      "name": "Enviar comprovante de outra pessoa — ANALISE_MANUAL",
+      "request": 
+      {
+        "method": "POST",
+        "header": 
+        [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+
+        "url": "{{baseUrl}}/api/clientes/{{clienteId}}/comprovantes",
+        "body": 
+        {
+          "mode": "raw",
+          "raw": "{\n  \"nomeArquivo\": \"conta-familiar.pdf\",\n  \"mimeType\": \"application/pdf\",\n  \"conteudoDocumento\": \"CONTA DE INTERNET\\nTitular: Carlos Pereira Lima\\nEndereco: Rua das Flores, 150\\nBairro: Boa Vista\\nCidade: Recife - PE\\nCEP: 50050-000\\nData de emissao: {{dataRecente}}\",\n  \"imagemBase64\": null\n}"
+        }
+      }
+    },
+
+    {
+      "name": "Consultar validação",
+      "request": 
+      {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/clientes/{{clienteId}}/comprovantes/{{validacaoId}}"
+      }
+    },
+
+    {
+      "name": "Histórico (backoffice)",
+      "request": 
+      {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/validacoes"
+      }
+    }
+
+  ],
+  "event": 
+  [
+    {
+      "listen": "prerequest",
+      "script": 
+      {
+        "exec": 
+        [
+          "// Data de emissão recente (hoje - 10 dias) em dd/MM/aaaa",
+          "const d = new Date(Date.now() - 10 * 86400000);",
+          "const pad = n => String(n).padStart(2, '0');",
+          "pm.collectionVariables.set('dataRecente', `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`);"
+        ]
+      }
+    }
+  ]
+}
