@@ -24,7 +24,8 @@ import br.com.cesarschool.documentos.dto.DadosComprovanteDto;
  * Com OPENAI_API_KEY usa a OpenAI; sem chave (ou se a chamada falhar) usa um interpretador local por regex.
  */
 @Service
-public class InterpretadorIaService {
+public class InterpretadorIaService 
+{
 
     private static final Logger log = LoggerFactory.getLogger(InterpretadorIaService.class);
 
@@ -35,28 +36,36 @@ public class InterpretadorIaService {
             cep (formato 00000-000), empresaEmissora, dataEmissao (formato yyyy-MM-dd).
             Use null para o que não encontrar. Não invente dados.""";
 
-    public record Interpretacao(DadosComprovanteDto dados, String descricao) {}
+    public record Interpretacao(DadosComprovanteDto dados, String descricao)
+    {}
 
     private final AppProperties props;
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
 
-    public InterpretadorIaService(AppProperties props, ObjectMapper objectMapper, RestClient.Builder builder) {
+    public InterpretadorIaService(AppProperties props, ObjectMapper objectMapper, RestClient.Builder builder) 
+    {
         this.props = props;
         this.objectMapper = objectMapper;
         this.restClient = builder.build();
     }
 
-    public Interpretacao interpretar(String texto) {
-        if (texto == null || texto.isBlank()) {
+    public Interpretacao interpretar(String texto) 
+    {
+        if (texto == null || texto.isBlank()) 
+        {
             return new Interpretacao(vazio(), "Sem texto para interpretar");
         }
         AppProperties.OpenAi openai = props.ai().openai();
-        if (openai.configurada()) {
-            try {
+        if (openai.configurada()) 
+        {
+            try 
+            {
                 return new Interpretacao(chamarOpenAi(texto, openai),
                         "JSON estruturado gerado (OpenAI " + openai.model() + ")");
-            } catch (Exception e) {
+            } 
+            catch (Exception e) 
+            {
                 log.warn("Falha na OpenAI, usando interpretador local: {}", e.getMessage());
                 return new Interpretacao(interpretarLocal(texto),
                         "JSON estruturado gerado (interpretador local — OpenAI falhou)");
@@ -65,7 +74,8 @@ public class InterpretadorIaService {
         return new Interpretacao(interpretarLocal(texto), "JSON estruturado gerado (interpretador local — regex)");
     }
 
-    private DadosComprovanteDto chamarOpenAi(String texto, AppProperties.OpenAi openai) throws Exception {
+    private DadosComprovanteDto chamarOpenAi(String texto, AppProperties.OpenAi openai) throws Exception 
+    {
         Map<String, Object> corpo = Map.of(
                 "model", openai.model(),
                 "temperature", 0,
@@ -98,11 +108,13 @@ public class InterpretadorIaService {
     private static final Pattern EMISSAO = Pattern.compile(
             "(?im)(?:data\\s+(?:de\\s+)?emiss[aã]o|emitid[oa]\\s+em|emiss[aã]o)\\s*[:\\-]?\\s*(\\d{2})[/.-](\\d{2})[/.-](\\d{4})");
 
-    private static Pattern rotulo(String nome) {
+    private static Pattern rotulo(String nome) 
+    {
         return Pattern.compile("(?im)^\\s*" + nome + "\\s*:\\s*(.+?)\\s*$");
     }
 
-    DadosComprovanteDto interpretarLocal(String texto) {
+    DadosComprovanteDto interpretarLocal(String texto) 
+    {
         String cep = primeiro(CEP_ROTULADO, texto);
         Matcher mCep = CEP.matcher(cep != null ? cep : texto);
         cep = mCep.find() ? mCep.group(1) + "-" + mCep.group(2) : cep;
@@ -117,23 +129,29 @@ public class InterpretadorIaService {
                 dataEmissao(texto));
     }
 
-    private static String primeiro(Pattern padrao, String texto) {
+    private static String primeiro(Pattern padrao, String texto) 
+    {
         Matcher m = padrao.matcher(texto);
         return m.find() ? m.group(1).strip() : null;
     }
 
-    private static LocalDate dataEmissao(String texto) {
+    private static LocalDate dataEmissao(String texto) 
+    {
         Matcher m = EMISSAO.matcher(texto);
         if (!m.find()) return null;
-        try {
+        try 
+        {
             return LocalDate.parse(m.group(1) + "/" + m.group(2) + "/" + m.group(3),
                     DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        } catch (Exception e) {
+        } 
+        catch (Exception e) 
+        {
             return null;
         }
     }
 
-    private static DadosComprovanteDto vazio() {
+    private static DadosComprovanteDto vazio() 
+    {
         return new DadosComprovanteDto(null, null, null, null, null, null, null);
     }
 }

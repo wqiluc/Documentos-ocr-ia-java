@@ -18,3 +18,9 @@ venv/
 .vscode/
 *.iml
 .DS_Store
+
+# Postman / Insomnia (arquivos locais dos apps)
+.postman/
+postman/collections/
+postman/globals/
+postman/*.insomnia.yaml

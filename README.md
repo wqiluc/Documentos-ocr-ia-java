@@ -437,6 +437,16 @@ curl http://localhost:8080/api/validacoes
 
 </details>
 
+<h2 align="center" id="rotas">🗺️ Rotas da API no Postman e no Insomnia <br>
+<img src="https://img.shields.io/badge/-Postman-111827?style=flat&logo=postman&logoColor=FF6C37" height="22"/>
+<img src="https://img.shields.io/badge/-Insomnia-111827?style=flat&logo=insomnia&logoColor=4000BF" height="22"/>
+<img src="https://img.shields.io/badge/-5_rotas_·_HTTP-111827?style=flat&logo=openapiinitiative&logoColor=6BA539" height="22"/>
+</h2>
+
+| <img src="./img/postman_http_routes.png" alt="Rotas da API no Postman" width="380"/> | <img src="./img/insomnia_https_routes.png" alt="Rotas da API no Insomnia" width="380"/> |
+| :---: | :---: |
+| <img src="https://img.shields.io/badge/-Postman_·_pastas_por_rota-111827?style=flat&logo=postman&logoColor=FF6C37" height="20"/> | <img src="https://img.shields.io/badge/-Insomnia_·_pastas_por_tag-111827?style=flat&logo=insomnia&logoColor=4000BF" height="20"/> |
+
 <h2 align="center" id="arquitetura">🏰 Arquitetura do Projeto <br>
 <img src="https://img.shields.io/badge/Architecture-111827?style=flat-square&logo=instructure&logoColor=white" height="22"/>
 </h2>
@@ -562,7 +572,6 @@ Documentos-ocr-ia-java📄🔍/
 │   └── respostas_validacao_documentos_Paguetti.pdf <img src="https://img.shields.io/badge/-Especificação_entregue-111827?style=flat&logo=adobeacrobatreader&logoColor=EC1C24" height="18"/>
 │
 ├── img <img src="https://img.shields.io/badge/-Assets-green?style=flat&logo=image&logoColor=white" height="18"/>/
-│   └── tesseract1.png · tesseract2.png · tesseract3.png <img src="https://img.shields.io/badge/-Prints_da_instalação-111827?style=flat&logo=homebrew&logoColor=FBB040" height="18"/>
 │
 ├── .gitignore <img src="https://img.shields.io/badge/-GitIgnore-111827?style=flat&logo=git&logoColor=F05032" height="18"/>
 ├── LICENSE <img src="https://img.shields.io/badge/License-MIT-FF8C00?style=flat&logo=opensource&logoColor=white" height="18"/>
