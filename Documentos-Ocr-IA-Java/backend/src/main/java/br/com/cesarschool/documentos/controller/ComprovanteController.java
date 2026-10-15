@@ -38,11 +38,13 @@ public class ComprovanteController
     }
 
     @PostMapping("/clientes/{clienteId}/comprovantes")
-    public ResponseEntity<ValidacaoResponse> enviarComprovante(@PathVariable Long clienteId,
-            @RequestBody ValidacaoRequest request) 
+    public ResponseEntity<ValidacaoResponse> enviarComprovante
+    (@PathVariable Long clienteId, @RequestBody ValidacaoRequest request) 
     {
         ValidacaoResponse resposta = validacaoService.validarComprovante(clienteId, request);
+
         URI local = URI.create("/api/clientes/%d/comprovantes/%d".formatted(clienteId, resposta.validacaoId()));
+        
         return ResponseEntity.created(local).body(resposta);
     }
 

@@ -47,7 +47,7 @@ def corrigir_inclinacao(binaria: np.ndarray) -> np.ndarray:
     altura, largura = binaria.shape
     matriz_rotacao = cv2.getRotationMatrix2D((largura // 2, altura // 2), angulo, 1.0)
     return cv2.warpAffine(binaria, matriz_rotacao, (largura, altura),
-                          flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+    flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 
 
 def pre_processar(imagem: np.ndarray) -> np.ndarray:
@@ -70,7 +70,6 @@ def main() -> None:
         sys.exit(2)
     caminho_entrada, caminho_saida = sys.argv[1], sys.argv[2]
     cv2.imwrite(caminho_saida, pre_processar(carregar_imagem(caminho_entrada)))
-
 
 if __name__ == "__main__":
     main()

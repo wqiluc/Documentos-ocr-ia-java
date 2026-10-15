@@ -46,7 +46,6 @@ public class ResultadoValidacao
     private String empresaEmissora;
     private LocalDate dataEmissao;
 
-    /** Listas guardadas como JSON (TEXT). */
     @Column(columnDefinition = "TEXT")
     private String regrasAtendidas;
 

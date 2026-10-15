@@ -56,7 +56,9 @@ public class InterpretadorIaService
         {
             return new Interpretacao(vazio(), "Sem texto para interpretar");
         }
+
         AppProperties.OpenAi openai = props.ai().openai();
+
         if (openai.configurada()) 
         {
             try 
@@ -85,12 +87,12 @@ public class InterpretadorIaService
                         Map.of("role", "user", "content", texto)));
 
         JsonNode resposta = restClient.post()
-                .uri(openai.url())
-                .header("Authorization", "Bearer " + openai.apiKey())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(corpo)
-                .retrieve()
-                .body(JsonNode.class);
+        .uri(openai.url())
+        .header("Authorization", "Bearer " + openai.apiKey())
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(corpo)
+        .retrieve()
+        .body(JsonNode.class);
 
         String json = resposta.path("choices").path(0).path("message").path("content").asText();
         return objectMapper.readValue(json, DadosComprovanteDto.class);
@@ -106,7 +108,7 @@ public class InterpretadorIaService
     private static final Pattern CEP = Pattern.compile("\\b(\\d{5})\\s*-?\\s*(\\d{3})\\b");
     private static final Pattern CEP_ROTULADO = rotulo("cep");
     private static final Pattern EMISSAO = Pattern.compile(
-            "(?im)(?:data\\s+(?:de\\s+)?emiss[aã]o|emitid[oa]\\s+em|emiss[aã]o)\\s*[:\\-]?\\s*(\\d{2})[/.-](\\d{2})[/.-](\\d{4})");
+    "(?im)(?:data\\s+(?:de\\s+)?emiss[aã]o|emitid[oa]\\s+em|emiss[aã]o)\\s*[:\\-]?\\s*(\\d{2})[/.-](\\d{2})[/.-](\\d{4})");
 
     private static Pattern rotulo(String nome) 
     {
@@ -139,6 +141,7 @@ public class InterpretadorIaService
     {
         Matcher m = EMISSAO.matcher(texto);
         if (!m.find()) return null;
+
         try 
         {
             return LocalDate.parse(m.group(1) + "/" + m.group(2) + "/" + m.group(3),

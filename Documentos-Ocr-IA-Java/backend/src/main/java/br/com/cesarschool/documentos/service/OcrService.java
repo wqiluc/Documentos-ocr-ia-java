@@ -39,7 +39,8 @@ public class OcrService
 
     public ResultadoOcr extrair(ImagemTratada imagem, String textoEnviado) 
     {
-        String motivoFallback = "nenhuma imagem enviada";
+        String motivoFallback = "Nenhuma imagem enviada";
+
         if (imagem != null && imagem.isPdf()) 
         {
             motivoFallback = "PDF precisa do OpenCV para virar imagem";
@@ -61,6 +62,7 @@ public class OcrService
                 log.warn("Tesseract indisponível: {}", e.getMessage());
                 motivoFallback = "Tesseract indisponível";
             }
+
         }
         if (textoEnviado != null && !textoEnviado.isBlank()) 
         {
@@ -78,6 +80,7 @@ public class OcrService
             Files.write(arquivo, imagem.conteudo());
             List<String> comando = new ArrayList<>(List.of(props.ocr().command(), arquivo.toString(), "stdout",
                     "-l", props.ocr().language()));
+                    
             if (props.ocr().tessdataPath() != null && !props.ocr().tessdataPath().isBlank()
                     && Files.isDirectory(Path.of(props.ocr().tessdataPath()))) 
             {
