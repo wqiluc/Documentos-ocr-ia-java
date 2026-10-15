@@ -46,7 +46,7 @@ function MarcadorDaEtapa({ ordem, concluida, atual }: Readonly<MarcadorDaEtapaPr
     if (concluida)
     {
         return (
-            <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-marca-600 text-white">
+            <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-confirma-500 text-stone-900">
                 <IconeConfirmado className="h-3.5 w-3.5" />
             </span>
         );
@@ -55,8 +55,8 @@ function MarcadorDaEtapa({ ordem, concluida, atual }: Readonly<MarcadorDaEtapaPr
     if (atual)
     {
         return (
-            <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-marca-600 bg-white">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-marca-600" />
+            <span className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-confirma-500 bg-white">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-confirma-500" />
             </span>
         );
     }
@@ -99,7 +99,7 @@ export default function LinhaEtapas({ etapasConcluidas, etapaEmAndamento, valida
                             <span
                                 aria-hidden="true"
                                 className={`absolute bottom-1 left-[11.5px] top-7 w-px transition-colors duration-300 ${
-                                    etapaConcluida ? 'bg-marca-500' : 'bg-stone-200'
+                                    etapaConcluida ? 'bg-confirma-500' : 'bg-stone-200'
                                 }`}
                             />
                         )}
@@ -109,7 +109,7 @@ export default function LinhaEtapas({ etapasConcluidas, etapaEmAndamento, valida
                         <div className="min-w-0 pt-0.5">
                             <p className={`text-sm ${etapaConcluida || etapaAtual ? 'font-medium text-stone-900' : 'text-stone-400'}`}>
                                 {etapa.nome}
-                                {etapaAtual && <span className="ml-2 text-xs font-normal text-marca-600">em andamento</span>}
+                                {etapaAtual && <span className="ml-2 text-xs font-normal text-confirma-800">em andamento</span>}
                             </p>
                             <p className={`mt-0.5 text-xs leading-relaxed ${corDaDescricao}`}>
                                 {resultadoDaEtapa ?? etapa.descricao}

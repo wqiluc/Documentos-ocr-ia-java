@@ -27,7 +27,7 @@ export default function ListaRegras({ resultado }: Readonly<ListaRegrasProps>)
                     <li key={regra.codigo} className="flex items-center gap-3 py-2.5 text-sm first:pt-0 last:pb-0">
                         <span
                             className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                                regraAtendida ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                                regraAtendida ? 'bg-confirma-100 text-confirma-700' : 'bg-red-100 text-red-700'
                             }`}
                         >
                             {regraAtendida ? <IconeConfirmado className="h-3 w-3" /> : <IconeRecusado className="h-3 w-3" />}

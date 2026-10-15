@@ -57,7 +57,8 @@ export default function PaginaResultado()
                         {formatarDataHora(validacao.criadoEm)}
                     </>
                 }
-                acoes={
+                acoes=
+                {
                     <Link to="/" className={CLASSE_BOTAO_SECUNDARIO}>
                         <IconeVoltar className="h-4 w-4" />
                         Novo envio

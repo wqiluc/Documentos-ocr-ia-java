@@ -41,7 +41,6 @@ export default function PaginaUpload()
         animacaoInterrompida.current = false;
         setEtapaEmAndamento(1);
 
-        // Avança a linha de etapas enquanto a API processa o documento de verdade.
         const animacaoDasEtapas = (async () =>
         {
             for (let proximaEtapa = 2; proximaEtapa <= ETAPAS.length; proximaEtapa++)

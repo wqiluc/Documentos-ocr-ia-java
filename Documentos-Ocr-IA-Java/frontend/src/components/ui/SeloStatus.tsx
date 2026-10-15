@@ -12,8 +12,8 @@ const APARENCIA_POR_STATUS: Record<StatusValidacao, AparenciaDoSelo> =
     APROVADO:
     {
         rotulo: 'Aprovado',
-        classeDoSelo: 'bg-emerald-50 text-emerald-800 ring-emerald-600/20',
-        classeDoPonto: 'bg-emerald-600',
+        classeDoSelo: 'bg-confirma-50 text-confirma-800 ring-confirma-600/25',
+        classeDoPonto: 'bg-confirma-500',
     },
     REPROVADO:
     {
@@ -24,8 +24,8 @@ const APARENCIA_POR_STATUS: Record<StatusValidacao, AparenciaDoSelo> =
     ANALISE_MANUAL:
     {
         rotulo: 'Análise manual',
-        classeDoSelo: 'bg-amber-50 text-amber-800 ring-amber-600/25',
-        classeDoPonto: 'bg-amber-500',
+        classeDoSelo: 'bg-sky-50 text-sky-800 ring-sky-600/20',
+        classeDoPonto: 'bg-sky-500',
     },
 };
 

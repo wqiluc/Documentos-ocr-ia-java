@@ -26,6 +26,19 @@ export default
                     700: '#114f3f',
                     900: '#0b2f27',
                 },
+                // Laranja do logo do projeto (500), usado em botões de confirmação e estados aprovados.
+                confirma:
+                {
+                    50: '#fef7ec',
+                    100: '#fdebd0',
+                    200: '#fad49e',
+                    400: '#f5b766',
+                    500: '#f2a341',
+                    600: '#dd8a22',
+                    700: '#b86c14',
+                    800: '#8f5313',
+                    900: '#5f3810',
+                },
             },
         },
     },

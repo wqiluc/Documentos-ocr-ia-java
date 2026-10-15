@@ -18,8 +18,8 @@ const APRESENTACAO_POR_STATUS: Record<StatusValidacao, ApresentacaoDoStatus> =
         titulo: 'Comprovante aprovado',
         resumo: 'Todas as regras foram atendidas. O endereço do cliente pode ser confirmado.',
         Icone: IconeConfirmado,
-        classeDoIcone: 'bg-emerald-100 text-emerald-700',
-        classeDoMarcador: 'bg-emerald-500',
+        classeDoIcone: 'bg-confirma-100 text-confirma-700',
+        classeDoMarcador: 'bg-confirma-500',
     },
     REPROVADO:
     {
@@ -34,8 +34,8 @@ const APRESENTACAO_POR_STATUS: Record<StatusValidacao, ApresentacaoDoStatus> =
         titulo: 'Encaminhado para análise manual',
         resumo: 'Algum dado precisa ser conferido por uma pessoa antes de seguir com o cadastro.',
         Icone: IconeAtencao,
-        classeDoIcone: 'bg-amber-100 text-amber-700',
-        classeDoMarcador: 'bg-amber-500',
+        classeDoIcone: 'bg-sky-100 text-sky-700',
+        classeDoMarcador: 'bg-sky-500',
     },
 };
 

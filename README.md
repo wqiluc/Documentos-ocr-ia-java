@@ -531,7 +531,7 @@ Documentos-ocr-ia-java📄🔍/
 │           ├── routes <img src="https://img.shields.io/badge/-React_Router-111827?style=flat-square&logo=reactrouter&logoColor=CA4245" height="18"/>/
 │           │   └── index.tsx <img src="https://img.shields.io/badge/-%2F_·_%2Fresultado%2F:clienteId%2F:validacaoId_·_%2Fvalidacoes-111827?style=flat&logo=reactrouter&logoColor=CA4245" height="18"/>
 │           ├── services <img src="https://img.shields.io/badge/-Cliente_HTTP-111827?style=flat-square&logo=javascript&logoColor=F7DF1E" height="18"/>/
-│           │   └── api.ts <img src="https://img.shields.io/badge/-fetch_·_5_endpoints-111827?style=flat&logo=typescript&logoColor=3178C6" height="18"/>
+│           │   └── api.ts <img src="https://img.shields.io/badge/-fetch_·_4_endpoints-111827?style=flat&logo=typescript&logoColor=3178C6" height="18"/>
 │           ├── types <img src="https://img.shields.io/badge/-Tipos-111827?style=flat-square&logo=typescript&logoColor=3178C6" height="18"/>/
 │           │   └── validacao.ts <img src="https://img.shields.io/badge/-Espelha_os_DTOs_do_backend-111827?style=flat&logo=typescript&logoColor=3178C6" height="18"/>
 │           ├── utils <img src="https://img.shields.io/badge/-Utilitários-111827?style=flat-square&logo=typescript&logoColor=3178C6" height="18"/>/
@@ -542,9 +542,8 @@ Documentos-ocr-ia-java📄🔍/
 │           │   │   ├── Cabecalho.tsx <img src="https://img.shields.io/badge/-Header_·_navegação-111827?style=flat&logo=react&logoColor=61DAFB" height="18"/>
 │           │   │   └── TituloPagina.tsx <img src="https://img.shields.io/badge/-Título_·_descrição_·_ações-111827?style=flat&logo=react&logoColor=61DAFB" height="18"/>
 │           │   ├── upload <img src="https://img.shields.io/badge/-Upload-111827?style=flat-square&logo=react&logoColor=E0234E" height="18"/>/
-│           │   │   ├── FormularioUpload.tsx <img src="https://img.shields.io/badge/-Cliente_·_arquivo_ou_texto_·_exemplos-111827?style=flat&logo=react&logoColor=E0234E" height="18"/>
-│           │   │   ├── PreviewDocumento.tsx <img src="https://img.shields.io/badge/-Pré--visualização_imagem%2FPDF-111827?style=flat&logo=react&logoColor=E0234E" height="18"/>
-│           │   │   └── exemplosDeComprovante.ts <img src="https://img.shields.io/badge/-4_cenários_de_exemplo-111827?style=flat&logo=typescript&logoColor=3178C6" height="18"/>
+│           │   │   ├── FormularioUpload.tsx <img src="https://img.shields.io/badge/-Cliente_·_arquivo-111827?style=flat&logo=react&logoColor=E0234E" height="18"/>
+│           │   │   └── PreviewDocumento.tsx <img src="https://img.shields.io/badge/-Pré--visualização_imagem%2FPDF-111827?style=flat&logo=react&logoColor=E0234E" height="18"/>
 │           │   ├── resultado <img src="https://img.shields.io/badge/-Resultado-111827?style=flat-square&logo=react&logoColor=22C55E" height="18"/>/
 │           │   │   ├── LinhaEtapas.tsx <img src="https://img.shields.io/badge/-Timeline_animada_·_6_etapas-111827?style=flat&logo=react&logoColor=A855F7" height="18"/>
 │           │   │   ├── CartaoResultado.tsx <img src="https://img.shields.io/badge/-Status_·_resumo_·_motivos-111827?style=flat&logo=react&logoColor=22C55E" height="18"/>

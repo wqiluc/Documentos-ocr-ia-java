@@ -9,10 +9,10 @@ export function formatarCpf(cpf: string): string
     return somenteDigitos.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
-/** Converte uma data da API (yyyy-MM-dd) para dd/MM/yyyy. */
 export function formatarData(dataIso: string): string
 {
     const partesDaData = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dataIso);
+
     if (!partesDaData)
     {
         return dataIso;

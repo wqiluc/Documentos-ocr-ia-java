@@ -67,16 +67,6 @@ export function IconeEnviarArquivo({ className }: Readonly<IconeProps>)
     );
 }
 
-export function IconeDocumento({ className }: Readonly<IconeProps>)
-{
-    return (
-        <DesenhoDoIcone className={className}>
-            <path d="M5.25 2.75h6l3.5 3.5v11h-9.5z" />
-            <path d="M11 2.75v3.75h3.75M8 10.5h4.5M8 13.5h4.5" />
-        </DesenhoDoIcone>
-    );
-}
-
 export function IconeVoltar({ className }: Readonly<IconeProps>)
 {
     return (

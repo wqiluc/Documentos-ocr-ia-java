@@ -31,8 +31,6 @@ export const api =
 {
     listarClientes: () => chamarApi<Cliente[]>('/api/clientes'),
 
-    buscarDocumentoExemplo: () => chamarApi<ValidacaoRequest>('/api/documentos/exemplo'),
-
     enviarComprovante: (clienteId: number, requisicao: ValidacaoRequest) =>
         chamarApi<ValidacaoResponse>(`/api/clientes/${clienteId}/comprovantes`,
         {

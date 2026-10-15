@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { IconeDocumento } from '../ui/Icones';
+import iconeJava from '../../assets/icone-java.svg';
 
 function classeDoLinkDeNavegacao({ isActive }: { isActive: boolean })
 {
@@ -18,9 +18,7 @@ export default function Cabecalho()
         <header className="border-b border-stone-200 bg-white">
             <div className="mx-auto flex max-w-5xl items-stretch justify-between gap-6 px-4">
                 <NavLink to="/" aria-label="Validação de Comprovantes" className="flex items-center gap-3 py-3">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-marca-700 text-white">
-                        <IconeDocumento className="h-[18px] w-[18px]" />
-                    </span>
+                    <img src={iconeJava} alt="" className="h-8 w-8 shrink-0" />
                     <span className="hidden leading-tight sm:block">
                         <span className="block text-sm font-semibold text-stone-900">Validação de Comprovantes</span>
                         <span className="block text-xs text-stone-500">Comprovante de residência</span>
