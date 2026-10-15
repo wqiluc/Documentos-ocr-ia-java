@@ -370,6 +370,28 @@ Hibernate fica em `ddl-auto=validate`.
 
 </details>
 
+<h2 align="center" id="telas">🖥️ Telas do Frontend <br>
+<img src="https://img.shields.io/badge/-React_18-111827?style=flat&logo=react&logoColor=61DAFB" height="22"/>
+<img src="https://img.shields.io/badge/-3_rotas-111827?style=flat&logo=reactrouter&logoColor=CA4245" height="22"/>
+</h2>
+
+Fluxo completo com o cliente **Joao da Silva** e o arquivo [`pdf/conta-luz-exemplo.png`](pdf/conta-luz-exemplo.png).
+
+| <img src="./pdf/tela-novo-envio.png" alt="Tela de novo envio" width="380"/> | <img src="./pdf/tela-novo-envio-arquivo-selecionado.png" alt="Novo envio com arquivo selecionado" width="380"/> |
+| :---: | :---: |
+| 1️⃣ Novo envio (`/`) — escolha do cliente e do comprovante | 2️⃣ Arquivo selecionado, com a prévia antes de validar |
+
+| <img src="./pdf/tela-resultado-validacao-aprovado.png" alt="Resultado da validação aprovado" width="560"/> |
+| :---: |
+| 3️⃣ Resultado (`/resultado/:clienteId/:validacaoId`) — dados extraídos, regras R01–R08 e timeline das 6 etapas |
+
+| <img src="./pdf/tela-historico-vazio.png" alt="Histórico sem validações" width="380"/> | <img src="./pdf/tela-historico-com-validacao.png" alt="Histórico com uma validação" width="380"/> |
+| :---: | :---: |
+| 4️⃣ Histórico (`/validacoes`) ainda vazio | 5️⃣ Histórico com a validação aprovada |
+
+> ℹ️ As capturas foram feitas sem o script OpenCV configurado, por isso a etapa 2 mostra o fallback
+> "OpenCV indisponível — imagem original".
+
 <h2 align="center" id="postman">🧰 Testando no Postman / Insomnia <br>
 <img src="https://img.shields.io/badge/-Postman-111827?style=flat&logo=postman&logoColor=FF6C37" height="22"/>
 <img src="https://img.shields.io/badge/-Insomnia-111827?style=flat&logo=insomnia&logoColor=4000BF" height="22"/>
@@ -568,7 +590,9 @@ Documentos-ocr-ia-java📄🔍/
 │   └── Documentos-OCR-IA.postman_collection.json <img src="https://img.shields.io/badge/-7_requests_·_3_cenários_·_variáveis-111827?style=flat&logo=postman&logoColor=FF6C37" height="18"/>
 │
 ├── pdf <img src="https://img.shields.io/badge/-PDF-111827?style=flat-square&logo=adobeacrobatreader&logoColor=EC1C24" height="18"/>/
-│   └── respostas_validacao_documentos_Paguetti.pdf <img src="https://img.shields.io/badge/-Especificação_entregue-111827?style=flat&logo=adobeacrobatreader&logoColor=EC1C24" height="18"/>
+│   ├── respostas_validacao_documentos_Paguetti.pdf <img src="https://img.shields.io/badge/-Especificação_entregue-111827?style=flat&logo=adobeacrobatreader&logoColor=EC1C24" height="18"/>
+│   ├── conta-luz-exemplo.png <img src="https://img.shields.io/badge/-Comprovante_de_teste-111827?style=flat&logo=image&logoColor=white" height="18"/>
+│   └── tela-*.png <img src="https://img.shields.io/badge/-Capturas_do_frontend-111827?style=flat&logo=react&logoColor=61DAFB" height="18"/>
 │
 ├── img <img src="https://img.shields.io/badge/-Assets-green?style=flat&logo=image&logoColor=white" height="18"/>/
 │
