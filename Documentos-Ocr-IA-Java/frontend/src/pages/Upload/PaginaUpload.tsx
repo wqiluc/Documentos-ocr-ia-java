@@ -73,7 +73,7 @@ export default function PaginaUpload()
     return (
         <div className="space-y-8">
             <TituloPagina
-                titulo="Novo comprovante"
+                titulo="Novo comprovante: "
                 descricao="Escolha o cliente e envie uma conta de luz, água ou internet emitida nos últimos 90 dias."
             />
 

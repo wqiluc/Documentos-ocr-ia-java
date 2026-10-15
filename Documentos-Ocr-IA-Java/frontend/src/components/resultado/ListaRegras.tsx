@@ -3,11 +3,11 @@ import { IconeConfirmado, IconeRecusado } from '../ui/Icones';
 
 // As descrições precisam ser iguais às constantes DESCRICAO das regras no backend.
 const REGRAS_DE_NEGOCIO = [
-    { codigo: 'R01', descricao: 'Documento legível' },
-    { codigo: 'R02', descricao: 'Campos obrigatórios presentes' },
-    { codigo: 'R06', descricao: 'Emissão dentro de 90 dias' },
-    { codigo: 'R07', descricao: 'CEP válido' },
-    { codigo: 'R08', descricao: 'Titular igual ao cliente cadastrado' },
+    { codigo: 'R01', descricao: 'Documento Legível ✅☕️' },
+    { codigo: 'R02', descricao: 'Campos obrigatórios presentes ✅☕️' },
+    { codigo: 'R06', descricao: 'Emissão dentro de 90 dias ✅☕️' },
+    { codigo: 'R07', descricao: 'CEP válido ✅☕️' },
+    { codigo: 'R08', descricao: 'Titular igual ao cliente cadastrado ✅☕️' },
 ];
 
 interface ListaRegrasProps

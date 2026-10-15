@@ -15,12 +15,14 @@ const APARENCIA_POR_STATUS: Record<StatusValidacao, AparenciaDoSelo> =
         classeDoSelo: 'bg-confirma-50 text-confirma-800 ring-confirma-600/25',
         classeDoPonto: 'bg-confirma-500',
     },
+
     REPROVADO:
     {
         rotulo: 'Reprovado',
         classeDoSelo: 'bg-red-50 text-red-800 ring-red-600/20',
         classeDoPonto: 'bg-red-600',
     },
+    
     ANALISE_MANUAL:
     {
         rotulo: 'Análise manual',

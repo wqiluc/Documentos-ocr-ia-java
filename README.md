@@ -1,4 +1,5 @@
-<h1 align="center"> Documentos OCR + IA 📝🤖<br>
+<h1 align="center"> Documentos OCR + IA <img src="./Documentos-Ocr-IA-Java/frontend/src/assets/icone-java.svg" alt="Ícone java"
+width="30">🤖<br>
 <img src="./img/Logo_OCR_Java.png" alt="Logo Projeto" width="550"> <br>
 <img src="https://img.shields.io/badge/-Java_21-020617?style=flat-square&logo=openjdk&logoColor=orange" height="19"/>
 <img src="https://img.shields.io/badge/-Spring_Boot-020617?style=flat-square&logo=springboot&logoColor=6DB33F" height="19"/>
