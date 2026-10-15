@@ -1,0 +1,289 @@
+openapi: 3.0.3
+info:
+  title: Documentos OCR + IA
+  version: 0.1.0-SNAPSHOT
+  description: |
+    Validação inteligente do **comprovante de residência** no onboarding de um banco digital.
+
+    Pipeline: Documento → OpenCV → Tesseract (OCR) → IA → regras em Java → banco.
+
+    Regras do MVP: R01 (legível), R02 (campos obrigatórios), R06 (emissão ≤ 90 dias),
+    R07 (CEP válido) e R08 (titular igual ao cliente → senão `ANALISE_MANUAL`).
+
+    O `POST` sempre devolve `201` quando o comprovante foi **processado**. O veredito fica em `resultado.status`.
+  license:
+    name: MIT
+    url: https://github.com/wqiluc/Documentos-ocr-ia-java/blob/main/LICENSE
+servers:
+  - url: http://localhost:8080
+    description: Backend local (mvn spring-boot:run)
+tags:
+  - name: Clientes
+    description: Clientes já cadastrados (criados pela migração do Flyway)
+  - name: Comprovantes
+    description: Envio e consulta da validação do comprovante de residência
+  - name: Demo
+    description: Apoio à demonstração
+
+paths:
+  /api/clientes:
+    get:
+      tags: [Clientes]
+      summary: Lista os clientes já cadastrados
+      operationId: listarClientes
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cliente'
+              example:
+                - { id: 1, nome: Joao da Silva, cpf: '52998224725' }
+                - { id: 2, nome: Maria Oliveira Santos, cpf: '11144477735' }
+
+  /api/documentos/exemplo:
+    get:
+      tags: [Demo]
+      summary: Payload pronto para o POST (data de emissão sempre recente)
+      operationId: payloadExemplo
+      responses:
+        '200':
+          description: Corpo de exemplo que resulta em APROVADO para o cliente 1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacaoRequest'
+
+  /api/clientes/{clienteId}/comprovantes:
+    post:
+      tags: [Comprovantes]
+      summary: Envia o comprovante de residência e executa o pipeline
+      operationId: enviarComprovante
+      parameters:
+        - $ref: '#/components/parameters/ClienteId'
+      requestBody:
+        required: true
+        description: Envie `conteudoDocumento` (texto), `imagemBase64` (imagem/PDF) ou ambos.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidacaoRequest'
+            examples:
+              aprovado:
+                summary: Texto recente no nome do cliente → APROVADO
+                value:
+                  nomeArquivo: comprovante-residencia.pdf
+                  mimeType: application/pdf
+                  conteudoDocumento: "CONTA DE ENERGIA\nEmpresa: Neoenergia Pernambuco\nTitular: Joao da Silva\nEndereco: Rua das Flores, 150\nBairro: Boa Vista\nCidade: Recife - PE\nCEP: 50050-000\nData de emissao: 28/09/2026"
+                  imagemBase64: null
+              reprovado:
+                summary: Comprovante antigo → REPROVADO (R06)
+                value:
+                  nomeArquivo: conta-antiga.pdf
+                  mimeType: application/pdf
+                  conteudoDocumento: "CONTA DE AGUA\nTitular: Joao da Silva\nEndereco: Rua das Flores, 150\nBairro: Boa Vista\nCidade: Recife - PE\nCEP: 50050-000\nData de emissao: 10/01/2025"
+                  imagemBase64: null
+              analiseManual:
+                summary: Titular diferente do cliente → ANALISE_MANUAL (R08)
+                value:
+                  nomeArquivo: conta-familiar.pdf
+                  mimeType: application/pdf
+                  conteudoDocumento: "CONTA DE INTERNET\nTitular: Carlos Pereira Lima\nEndereco: Rua das Flores, 150\nBairro: Boa Vista\nCidade: Recife - PE\nCEP: 50050-000\nData de emissao: 28/09/2026"
+                  imagemBase64: null
+              imagem:
+                summary: Imagem em base64 (passa por OpenCV + Tesseract)
+                value:
+                  nomeArquivo: conta-luz.png
+                  mimeType: image/png
+                  conteudoDocumento: null
+                  imagemBase64: iVBORw0KGgoAAAANSUhEUgAA...
+      responses:
+        '201':
+          description: Comprovante processado (veja `resultado.status`)
+          headers:
+            Location:
+              description: URL para consultar esta validação
+              schema:
+                type: string
+                example: /api/clientes/1/comprovantes/1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacaoResponse'
+        '400':
+          description: Corpo sem texto e sem imagem, base64 inválido ou JSON malformado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Envie conteudoDocumento (texto) e/ou imagemBase64.
+        '404':
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Cliente 999 não encontrado.
+
+  /api/clientes/{clienteId}/comprovantes/{validacaoId}:
+    get:
+      tags: [Comprovantes]
+      summary: Consulta o resultado de uma validação
+      operationId: consultarValidacao
+      parameters:
+        - $ref: '#/components/parameters/ClienteId'
+        - name: validacaoId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Validação encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidacaoResponse'
+        '404':
+          description: Validação não existe para esse cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Validação 7 não encontrada para o cliente 1.
+
+  /api/validacoes:
+    get:
+      tags: [Comprovantes]
+      summary: Histórico de validações (backoffice / compliance), mais recentes primeiro
+      operationId: listarValidacoes
+      responses:
+        '200':
+          description: Lista de validações
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValidacaoResponse'
+
+components:
+  parameters:
+    ClienteId:
+      name: clienteId
+      in: path
+      required: true
+      description: Id do cliente já cadastrado (1 = Joao da Silva, 2 = Maria Oliveira Santos)
+      schema:
+        type: integer
+        format: int64
+        example: 1
+
+  schemas:
+    Cliente:
+      type: object
+      properties:
+        id: { type: integer, format: int64, example: 1 }
+        nome: { type: string, example: Joao da Silva }
+        cpf: { type: string, description: Somente dígitos, example: '52998224725' }
+
+    ValidacaoRequest:
+      type: object
+      description: Pelo menos um entre `conteudoDocumento` e `imagemBase64` é obrigatório.
+      properties:
+        nomeArquivo:
+          type: string
+          nullable: true
+          example: comprovante-residencia.pdf
+        mimeType:
+          type: string
+          nullable: true
+          description: Define a extensão usada no OCR
+          enum: [image/png, image/jpeg, application/pdf, text/plain]
+          example: application/pdf
+        conteudoDocumento:
+          type: string
+          nullable: true
+          description: |
+            Texto já extraído (também é o fallback se o OCR falhar). O interpretador local reconhece linhas
+            `Rótulo: valor` — Titular, Endereço, Bairro, Cidade, CEP, Empresa e Data de emissão (dd/mm/aaaa).
+        imagemBase64:
+          type: string
+          nullable: true
+          description: Imagem ou PDF em base64 (aceita o prefixo `data:image/png;base64,`)
+
+    EtapaPipeline:
+      type: object
+      properties:
+        ordem: { type: integer, example: 3 }
+        nome:
+          type: string
+          enum: [Documento, OpenCV, Tesseract, IA, Regras]
+          example: Tesseract
+        resultado: { type: string, example: Texto extraído (confiança 96%) }
+
+    DadosComprovante:
+      type: object
+      description: JSON gerado pela IA (ou pelo interpretador local). Campos não encontrados vêm `null`.
+      properties:
+        nomeTitular: { type: string, nullable: true, example: Joao da Silva }
+        endereco: { type: string, nullable: true, example: 'Rua das Flores, 150' }
+        bairro: { type: string, nullable: true, example: Boa Vista }
+        cidadeUf: { type: string, nullable: true, example: Recife - PE }
+        cep: { type: string, nullable: true, example: 50050-000 }
+        empresaEmissora: { type: string, nullable: true, example: Neoenergia Pernambuco }
+        dataEmissao: { type: string, format: date, nullable: true, example: '2026-09-28' }
+
+    StatusValidacao:
+      type: string
+      enum: [APROVADO, REPROVADO, ANALISE_MANUAL]
+
+    ResultadoValidacao:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusValidacao'
+        regrasAtendidas:
+          type: array
+          items: { type: string }
+          example:
+            - Documento legível
+            - Campos obrigatórios presentes
+            - Emissão dentro de 90 dias
+            - CEP válido
+            - Titular igual ao cliente cadastrado
+        motivos:
+          type: array
+          description: Sempre preenchido quando não for APROVADO, para o cliente saber o que reenviar
+          items: { type: string }
+          example: []
+
+    ValidacaoResponse:
+      type: object
+      properties:
+        validacaoId: { type: integer, format: int64, example: 1 }
+        clienteId: { type: integer, format: int64, example: 1 }
+        nomeCliente: { type: string, example: Joao da Silva }
+        nomeArquivo: { type: string, example: comprovante-residencia.pdf }
+        criadoEm: { type: string, format: date-time, example: '2026-10-08T13:56:48.703274' }
+        etapas:
+          type: array
+          items:
+            $ref: '#/components/schemas/EtapaPipeline'
+        dadosExtraidos:
+          $ref: '#/components/schemas/DadosComprovante'
+        resultado:
+          $ref: '#/components/schemas/ResultadoValidacao'
+
+    Erro:
+      type: object
+      properties:
+        erro: { type: string, example: Cliente 999 não encontrado. }
