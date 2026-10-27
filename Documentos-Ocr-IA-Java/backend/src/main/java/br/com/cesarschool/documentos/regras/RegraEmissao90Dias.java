@@ -57,8 +57,8 @@ public class RegraEmissao90Dias implements Regra
         if (dias > diasMaximos) 
         {
             return ResultadoRegra.falhou(CODIGO, DESCRICAO,
-                    "Comprovante emitido há mais de %d dias (%d dias). Envie um comprovante mais recente."
-                            .formatted(diasMaximos, dias));
+                    "Comprovante emitido há mais de %d dias (%d dias) e excedeu o prazo de %d dias❌. Envie um comprovante mais recente."
+                            .formatted(diasMaximos, dias, diasMaximos));
         }
 
         return ResultadoRegra.atendida(CODIGO, DESCRICAO);

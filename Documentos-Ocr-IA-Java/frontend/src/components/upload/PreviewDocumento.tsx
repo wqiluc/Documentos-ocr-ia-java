@@ -12,11 +12,13 @@ export default function PreviewDocumento({ arquivo, urlDaPreVisualizacao }: Read
     return (
         <figure className="mt-3 overflow-hidden rounded-md border border-stone-200">
             <div className="bg-stone-100">
-                {arquivoEhPdf ? (
+                {arquivoEhPdf ? 
+                (
                     <object data={urlDaPreVisualizacao} type="application/pdf" className="h-72 w-full">
                         <p className="p-4 text-sm text-stone-500">Não foi possível pré-visualizar este PDF.</p>
                     </object>
-                ) : (
+                ) : 
+                (
                     <img
                         src={urlDaPreVisualizacao}
                         alt="Pré-visualização do comprovante"
