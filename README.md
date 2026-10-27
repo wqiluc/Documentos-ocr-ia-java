@@ -23,12 +23,16 @@ informando o motivo.
 > OpenAPI em [`docs/openapi.yaml`](docs/openapi.yaml).
 
 
-<h2 align="center" id="docente">👨‍🏫 Docente: </h2>
+<h2 align="center" id="docente">👨‍🏫 Docente: <br>
+<img src="https://img.shields.io/badge/-Orientação-111827?style=flat&logo=googlescholar&logoColor=4285F4" height="22"/>
+</h2>
 <ul>
 <li><b>Kleber Meira</b> <a href="https://www.linkedin.com/in/kleber-m-3b5532b6/" target="_blank"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" width="14"/></a> <a href="https://github.com/KleberMeira" target="_blank"><img src="https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=white" height="16"/></a></li>
 </ul>
 
-<h2 align="center" id="autor">👤👨‍🎓 Autor: </h2>
+<h2 align="center" id="autor">👤👨‍🎓 Autor: <br>
+<img src="https://img.shields.io/badge/-Desenvolvimento-111827?style=flat&logo=github&logoColor=white" height="22"/>
+</h2>
 <ul>
 <li><b>Lucas Paguetti Pereira</b> <a href="https://www.linkedin.com/in/lucas-paguetti-pereira" target="_blank"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" width="14"/></a> <a href="https://github.com/wqiluc" target="_blank"><img src="https://img.shields.io/badge/GitHub-000000?style=for-the-badge&logo=github&logoColor=white" height="16"/></a></li>
 </ul>
@@ -107,7 +111,9 @@ comprovante antigo ou em nome de outra pessoa).
 | 🛡️ Equipe de compliance | Consulta o histórico e os motivos de reprovação |
 | 📱 Cliente | Envia os documentos e acompanha o status do cadastro |
 
-<h2 align="center" id="regras">📏 Documentos e Regras de Negócio </h2>
+<h2 align="center" id="regras">📏 Documentos e Regras de Negócio <br>
+<img src="https://img.shields.io/badge/-9_regras_·_5_no_MVP-111827?style=flat&logo=checkmarx&logoColor=54B848" height="22"/>
+</h2>
 
 | Documento | Exemplos | Dados extraídos |
 | :--- | :--- | :--- |
@@ -139,7 +145,9 @@ histórico do backoffice).
 **Próximos passos:** documento de identificação (R03, R04, R05, R09), validação cruzada de nome e CPF entre RG/CNH e
 comprovante, e um endpoint de cadastro de clientes (hoje eles vêm da migração do Flyway).
 
-<h2 align="center" id="fluxo">🔄 Fluxo do Sistema </h2>
+<h2 align="center" id="fluxo">🔄 Fluxo do Sistema <br>
+<img src="https://img.shields.io/badge/-OpenCV_→_Tesseract_→_IA-111827?style=flat&logo=opencv&logoColor=5C3EE8" height="22"/>
+</h2>
 
 ```mermaid
 flowchart LR
@@ -163,7 +171,9 @@ flowchart LR
 > 💡 A resposta traz o campo `etapas`, dizendo o que aconteceu em cada passo — inclusive quando um fallback foi
 > usado (ex.: `"OpenCV indisponível — imagem original"`). Assim a demo funciona sem credenciais nem ferramentas instaladas.
 
-<h2 align="center" id="api">🌐 Endpoints </h2>
+<h2 align="center" id="api">🌐 Endpoints <br>
+<img src="https://img.shields.io/badge/-REST_·_5_endpoints-111827?style=flat&logo=swagger&logoColor=85EA2D" height="22"/>
+</h2>
 
 | Método | Rota | Descrição | Respostas |
 | :---: | :--- | :--- | :--- |
@@ -246,7 +256,10 @@ cliente \"Joao da Silva\". Encaminhado para análise manual."`
 
 </details>
 
-<h2 align="center" id="executar">▶️ Como Executar </h2>
+<h2 align="center" id="executar">▶️ Como Executar <br>
+<img src="https://img.shields.io/badge/-Maven-111827?style=flat&logo=apachemaven&logoColor=C71A36" height="22"/>
+<img src="https://img.shields.io/badge/-npm-111827?style=flat&logo=npm&logoColor=CB3837" height="22"/>
+</h2>
 
 | Ferramenta | Obrigatória? | Para quê |
 | :--- | :---: | :--- |
