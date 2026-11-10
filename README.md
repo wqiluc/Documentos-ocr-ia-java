@@ -143,7 +143,8 @@ regras R01, R02, R06, R07 e R08 → banco → consulta via API e frontend (uploa
 histórico do backoffice).
 
 **Próximos passos:** documento de identificação (R03, R04, R05, R09), validação cruzada de nome e CPF entre RG/CNH e
-comprovante, e um endpoint de cadastro de clientes (hoje eles vêm da migração do Flyway).
+comprovante. Os clientes de exemplo vêm da migração do Flyway, e novos clientes de teste podem ser criados via
+`POST /api/clientes` (veja [Criando um cliente de teste](#cliente-teste)).
 
 <h2 align="center" id="fluxo">🔄 Fluxo do Sistema <br>
 <img src="https://img.shields.io/badge/-OpenCV_→_Tesseract_→_IA-111827?style=flat&logo=opencv&logoColor=5C3EE8" height="22"/>
@@ -172,19 +173,21 @@ flowchart LR
 > usado (ex.: `"OpenCV indisponível — imagem original"`). Assim a demo funciona sem credenciais nem ferramentas instaladas.
 
 <h2 align="center" id="api">🌐 Endpoints <br>
-<img src="https://img.shields.io/badge/-REST_·_5_endpoints-111827?style=flat&logo=swagger&logoColor=85EA2D" height="22"/>
+<img src="https://img.shields.io/badge/-REST_·_6_endpoints-111827?style=flat&logo=swagger&logoColor=85EA2D" height="22"/>
 </h2>
 
 | Método | Rota | Descrição | Respostas |
 | :---: | :--- | :--- | :--- |
 | `GET` | `/api/clientes` | Lista os clientes cadastrados | `200` |
+| `POST` | `/api/clientes` | Cadastra um cliente de teste (`{ "nome", "cpf" }`) | `201` · `400` |
 | `GET` | `/api/documentos/exemplo` | Payload pronto para a demo (data de emissão sempre recente) | `200` |
 | `POST` | `/api/clientes/{clienteId}/comprovantes` | Envia o comprovante e executa o pipeline | `201` · `400` · `404` |
 | `GET` | `/api/clientes/{clienteId}/comprovantes/{validacaoId}` | Consulta o resultado de uma validação | `200` · `404` |
 | `GET` | `/api/validacoes` | Histórico de validações, da mais recente para a mais antiga | `200` |
 
 O `POST` devolve `201` mesmo quando o comprovante é reprovado: o veredito fica em `resultado.status`. Erros voltam como
-`{ "erro": "mensagem" }` — cliente ou validação inexistente (`404`), corpo sem texto nem imagem ou base64 inválido (`400`).
+`{ "erro": "mensagem" }` — cliente ou validação inexistente (`404`), corpo sem texto nem imagem ou base64 inválido (`400`),
+cliente sem nome, com CPF sem 11 dígitos ou já cadastrado (`400`).
 
 <details>
 <summary>▶️📥 <b>Exemplo de request</b></summary>
@@ -462,6 +465,49 @@ curl http://localhost:8080/api/validacoes
 
 </details>
 
+<h3 align="left" id="cliente-teste">👤 Criando um cliente de teste</h3>
+
+O seletor de clientes da tela **Novo envio** é preenchido pelo `GET /api/clientes`, então basta cadastrar o cliente na
+API e **recarregar o frontend** (`F5`) para ele aparecer na lista. O CPF pode vir com ou sem pontuação, mas precisa ter
+11 dígitos e não pode repetir.
+
+```bash
+curl -X POST http://localhost:8080/api/clientes \
+  -H 'Content-Type: application/json' \
+  -d '{ "nome": "Carlos Teste Souza", "cpf": "123.456.789-09" }'
+# 201 → {"id":8,"nome":"Carlos Teste Souza","cpf":"12345678909"}
+```
+
+Ou, com o frontend aberto em `http://localhost:5173`, direto no console do navegador (`F12` → *Console*), passando pelo
+proxy do Vite:
+
+```js
+await fetch('/api/clientes', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ nome: 'Carlos Teste Souza', cpf: '123.456.789-09' }),
+}).then((resposta) => resposta.json());
+```
+
+Para levar o novo cliente a cada nível de aprovação, o que manda é o comprovante enviado para ele:
+
+| Comprovante enviado para o cliente novo | Resultado |
+| :--- | :--- |
+| `Titular` igual ao nome cadastrado e emitido nos últimos 90 dias | `APROVADO` |
+| `Titular` com outro nome (cônjuge, pai, irmão…) | `ANALISE_MANUAL` (R08) |
+| Emitido há mais de 90 dias ou com CEP inválido | `REPROVADO` (R06 · R07) |
+
+```bash
+# payload de exemplo com o titular trocado para o cliente novo (id 8) → APROVADO
+curl -s http://localhost:8080/api/documentos/exemplo \
+  | sed 's/Joao da Silva/Carlos Teste Souza/' \
+  | curl -s -X POST http://localhost:8080/api/clientes/8/comprovantes \
+         -H 'Content-Type: application/json' -d @-
+```
+
+> ℹ️ Com o H2 (padrão), o cliente criado some quando a API reinicia — os ids voltam a começar do 8. Para mantê-lo,
+> suba com o perfil `postgres`.
+
 <details>
 <summary>▶️🎬 <b>Roteiro para a demo</b></summary>
 
@@ -511,9 +557,10 @@ Documentos-ocr-ia-java📄🔍/
 │   │       │       │   ├── AppProperties.java <img src="https://img.shields.io/badge/-%40ConfigurationProperties_app.*-111827?style=flat&logo=springboot&logoColor=6DB33F" height="18"/>
 │   │       │       │   └── CorsConfig.java <img src="https://img.shields.io/badge/-CORS_%2Fapi%2F**_→_:5173-111827?style=flat&logo=springboot&logoColor=6DB33F" height="18"/>
 │   │       │       ├── controller <img src="https://img.shields.io/badge/-REST_Controllers-111827?style=flat-square&logo=springboot&logoColor=6DB33F" height="18"/>/
-│   │       │       │   ├── ComprovanteController.java <img src="https://img.shields.io/badge/-GET_%2Fclientes_·_POST,GET_%2Fcomprovantes_·_GET_%2Fvalidacoes-111827?style=flat&logo=springboot&logoColor=6DB33F" height="18"/>
+│   │       │       │   ├── ComprovanteController.java <img src="https://img.shields.io/badge/-GET,POST_%2Fclientes_·_POST,GET_%2Fcomprovantes_·_GET_%2Fvalidacoes-111827?style=flat&logo=springboot&logoColor=6DB33F" height="18"/>
 │   │       │       │   └── DocumentoExemploController.java <img src="https://img.shields.io/badge/-GET_%2Fdocumentos%2Fexemplo-111827?style=flat&logo=springboot&logoColor=6DB33F" height="18"/>
 │   │       │       ├── dto <img src="https://img.shields.io/badge/-DTO-111827?style=flat-square&logo=openapiinitiative&logoColor=6BA539" height="18"/>/
+│   │       │       │   ├── NovoClienteRequest.java <img src="https://img.shields.io/badge/-Request-111827?style=flat&logo=openapiinitiative&logoColor=6BA539" height="18"/>
 │   │       │       │   ├── ValidacaoRequest.java <img src="https://img.shields.io/badge/-Request-111827?style=flat&logo=openapiinitiative&logoColor=6BA539" height="18"/>
 │   │       │       │   ├── ValidacaoResponse.java <img src="https://img.shields.io/badge/-Response-111827?style=flat&logo=openapiinitiative&logoColor=6BA539" height="18"/>
 │   │       │       │   ├── EtapaPipeline.java <img src="https://img.shields.io/badge/-Response-111827?style=flat&logo=openapiinitiative&logoColor=6BA539" height="18"/>
