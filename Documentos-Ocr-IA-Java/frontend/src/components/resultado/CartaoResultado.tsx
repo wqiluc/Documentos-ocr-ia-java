@@ -15,7 +15,7 @@ const APRESENTACAO_POR_STATUS: Record<StatusValidacao, ApresentacaoDoStatus> =
 {
     APROVADO:
     {
-        titulo: 'Comprovante Aprovado✅',
+        titulo: 'Comprovante devidamente Aprovado✅',
         resumo: 'Todas as regras foram atendidas. O endereço do cliente pode ser confirmado.✅',
         Icone: IconeConfirmado,
         classeDoIcone: 'bg-confirma-100 text-confirma-700',
@@ -24,14 +24,14 @@ const APRESENTACAO_POR_STATUS: Record<StatusValidacao, ApresentacaoDoStatus> =
     REPROVADO:
     {
         titulo: 'Comprovante Reprovado❌',
-        resumo: 'O documento não atende a todas as regras. Peça ao cliente um novo comprovante. ❌',
+        resumo: 'O documento não atende a todas as regras. Peça ao cliente um novo comprovante para aprovação. ❌',
         Icone: IconeRecusado,
         classeDoIcone: 'bg-red-100 text-red-700',
         classeDoMarcador: 'bg-red-500',
     },
     ANALISE_MANUAL:
     {
-        titulo: 'Encaminhado para análise manual ...',
+        titulo: 'Encaminhado para análise manual ... ⛏️',
         resumo: 'Algum dado precisa ser conferido por uma pessoa antes de seguir com o cadastro. ⚠️',
         Icone: IconeAtencao,
         classeDoIcone: 'bg-sky-100 text-sky-700',

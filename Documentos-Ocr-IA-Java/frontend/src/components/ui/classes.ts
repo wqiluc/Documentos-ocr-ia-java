@@ -1,5 +1,3 @@
-// Classes do Tailwind repetidas em mais de uma tela.
-
 export const CLASSE_BOTAO_PRINCIPAL =
     'inline-flex items-center justify-center gap-2 rounded-md bg-confirma-500 px-4 py-2 text-sm font-medium text-stone-900 '
     + 'transition-colors hover:bg-confirma-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 '

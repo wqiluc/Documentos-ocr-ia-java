@@ -12,51 +12,52 @@ import br.com.cesarschool.documentos.dominio.ComprovanteResidencia;
 /** R02 — nome do titular, endereço, cidade/UF, CEP e data de emissão presentes. */
 @Component
 @Order(2)
-public class RegraCamposObrigatorios implements Regra 
+public class RegraCamposObrigatorios implements Regra
 {
 
     static final String CODIGO = "R02";
     static final String DESCRICAO = "Campos obrigatórios presentes";
 
     @Override
-    public ResultadoRegra avaliar(ComprovanteResidencia c, Cliente cliente) 
+    public ResultadoRegra avaliar(ComprovanteResidencia comprovante, Cliente cliente)
     {
-        List<String> faltando = new ArrayList<>();
-        if (vazio(c.nomeTitular())) 
+        List<String> camposAusentes = new ArrayList<>();
+
+        if (estaVazio(comprovante.nomeTitular()))
         {
-            faltando.add("nome do titular");
+            camposAusentes.add("nome do titular");
         }
 
-        if (vazio(c.endereco())) 
+        if (estaVazio(comprovante.endereco()))
         {
-            faltando.add("endereço");
+            camposAusentes.add("endereço");
         }
 
-        if (vazio(c.cidadeUf())) 
+        if (estaVazio(comprovante.cidadeUf()))
         {
-            faltando.add("cidade/UF");
+            camposAusentes.add("cidade/UF");
         }
 
-        if (vazio(c.cep())) 
+        if (estaVazio(comprovante.cep()))
         {
-            faltando.add("CEP");
+            camposAusentes.add("CEP");
         }
 
-        if (c.dataEmissao() == null) 
+        if (comprovante.dataEmissao() == null)
         {
-            faltando.add("data de emissão");
+            camposAusentes.add("data de emissão");
         }
 
-        if (faltando.isEmpty()) 
+        if (camposAusentes.isEmpty())
         {
             return ResultadoRegra.atendida(CODIGO, DESCRICAO);
         }
 
         return ResultadoRegra.falhou(CODIGO, DESCRICAO,
-                "Campo(s) obrigatório(s) não encontrado(s) no comprovante: " + String.join(", ", faltando) + ".");
+                "Campo(s) obrigatório(s) não encontrado(s) no comprovante: " + String.join(", ", camposAusentes) + ".");
     }
 
-    private static boolean vazio(String valor) 
+    private static boolean estaVazio(String valor)
     {
         return valor == null || valor.isBlank();
     }

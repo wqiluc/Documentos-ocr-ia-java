@@ -1,13 +1,21 @@
+import type { ReactNode } from 'react';
 import type { EtapaPipeline } from '../../types/validacao';
-import { IconeConfirmado } from '../ui/Icones';
+import { IconeConfirmado, IconeOpenCv } from '../ui/Icones';
 
-export const ETAPAS = [
-    { nome: 'Documento', descricao: 'Recebimento do arquivo' },
-    { nome: 'OpenCV', descricao: 'Tratamento da imagem: tons de cinza, ruído e inclinação' },
-    { nome: 'Tesseract', descricao: 'Leitura do texto em português' },
-    { nome: 'IA', descricao: 'Extração dos campos do comprovante' },
-    { nome: 'Regras', descricao: 'Conferência das regras R01, R02, R06, R07 e R08' },
-    { nome: 'PostgreSQL', descricao: 'Registro do resultado' },
+interface EtapaDoProcesso
+{
+    nome: string;
+    icone: ReactNode;
+    descricao: string;
+}
+
+export const ETAPAS: EtapaDoProcesso[] = [
+    { nome: 'Documento', icone: '📄', descricao: 'Recebimento do arquivo' },
+    { nome: 'OpenCV', icone: <IconeOpenCv className="h-4 w-4" />, descricao: 'Tratamento da imagem: tons de cinza, ruído e inclinação' },
+    { nome: 'Tesseract', icone: '🔍', descricao: 'Leitura do texto em português' },
+    { nome: 'IA', icone: '🤖', descricao: 'Extração dos campos do comprovante' },
+    { nome: 'Regras', icone: '☕️', descricao: 'Conferência das regras R01, R02, R06, R07 e R08' },
+    { nome: 'PostgreSQL', icone: '🐘', descricao: 'Registro do resultado' },
 ];
 
 const ORDEM_DA_ETAPA_DE_REGISTRO = 6;
@@ -107,9 +115,17 @@ export default function LinhaEtapas({ etapasConcluidas, etapaEmAndamento, valida
                         <MarcadorDaEtapa ordem={ordem} concluida={etapaConcluida} atual={etapaAtual} />
 
                         <div className="min-w-0 pt-0.5">
-                            <p className={`text-sm ${etapaConcluida || etapaAtual ? 'font-medium text-stone-900' : 'text-stone-400'}`}>
+                            <p className={`flex items-center gap-1.5 text-sm ${etapaConcluida || etapaAtual ? 'font-medium text-stone-900' : 'text-stone-400'}`}>
+                                <span
+                                    aria-hidden="true"
+                                    className={`inline-flex w-4 shrink-0 justify-center text-sm leading-none transition ${
+                                        etapaConcluida || etapaAtual ? '' : 'opacity-40 grayscale'
+                                    }`}
+                                >
+                                    {etapa.icone}
+                                </span>
                                 {etapa.nome}
-                                {etapaAtual && <span className="ml-2 text-xs font-normal text-confirma-800">em andamento</span>}
+                                {etapaAtual && <span className="ml-1 text-xs font-normal text-confirma-800">em andamento</span>}
                             </p>
                             <p className={`mt-0.5 text-xs leading-relaxed ${corDaDescricao}`}>
                                 {resultadoDaEtapa ?? etapa.descricao}

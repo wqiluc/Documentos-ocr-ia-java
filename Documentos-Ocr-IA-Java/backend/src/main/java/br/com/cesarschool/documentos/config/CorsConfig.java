@@ -5,21 +5,21 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class CorsConfig implements WebMvcConfigurer 
+public class CorsConfig implements WebMvcConfigurer
 {
 
-    private final AppProperties props;
+    private final AppProperties propriedades;
 
-    public CorsConfig(AppProperties props) 
+    public CorsConfig(AppProperties propriedades)
     {
-        this.props = props;
+        this.propriedades = propriedades;
     }
 
     @Override
-    public void addCorsMappings(CorsRegistry registry) 
+    public void addCorsMappings(CorsRegistry registry)
     {
         registry.addMapping("/api/**")
-        .allowedOrigins(props.cors().origens().toArray(String[]::new))
-        .allowedMethods("GET", "POST", "OPTIONS");
+                .allowedOrigins(propriedades.cors().origens().toArray(String[]::new))
+                .allowedMethods("GET", "POST", "OPTIONS");
     }
 }

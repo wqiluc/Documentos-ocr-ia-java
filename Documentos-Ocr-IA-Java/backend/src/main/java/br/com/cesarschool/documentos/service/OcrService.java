@@ -1,11 +1,13 @@
 package br.com.cesarschool.documentos.service;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,7 @@ import br.com.cesarschool.documentos.service.OpenCvService.ImagemTratada;
  * Sem imagem ou sem Tesseract, usa o texto enviado em {@code conteudoDocumento}.
  */
 @Service
-public class OcrService 
+public class OcrService
 {
 
     private static final Logger log = LoggerFactory.getLogger(OcrService.class);
@@ -27,107 +29,139 @@ public class OcrService
     /** Confiança atribuída a um texto que já veio digitado/extraído (não passou por OCR). */
     static final double CONFIANCA_TEXTO_ENVIADO = 95.0;
 
+    // Colunas do TSV do Tesseract:
+    // level, page_num, block_num, par_num, line_num, word_num, left, top, width, height, conf, text
+    private static final int TOTAL_DE_COLUNAS_TSV = 12;
+    private static final int COLUNA_NIVEL = 0;
+    private static final int COLUNA_PAGINA = 1;
+    private static final int COLUNA_BLOCO = 2;
+    private static final int COLUNA_PARAGRAFO = 3;
+    private static final int COLUNA_LINHA = 4;
+    private static final int COLUNA_CONFIANCA = 10;
+    private static final int COLUNA_TEXTO = 11;
+    private static final String NIVEL_PALAVRA = "5";
+
     public record ResultadoOcr(String texto, double confianca, String descricao)
     {}
 
-    private final AppProperties props;
+    private final AppProperties propriedades;
 
-    public OcrService(AppProperties props) 
+    public OcrService(AppProperties propriedades)
     {
-        this.props = props;
+        this.propriedades = propriedades;
     }
 
-    public ResultadoOcr extrair(ImagemTratada imagem, String textoEnviado) 
+    public ResultadoOcr extrair(ImagemTratada imagem, String textoEnviado)
     {
-        String motivoFallback = "Nenhuma imagem enviada";
+        boolean recebeuTexto = textoEnviado != null && !textoEnviado.isBlank();
+        String motivoDoFallback = "Nenhuma imagem enviada";
 
-        if (imagem != null && imagem.isPdf()) 
+        if (imagem != null && imagem.isPdf())
         {
-            motivoFallback = "PDF precisa do OpenCV para virar imagem";
-        } 
-        else if (imagem != null) 
-        {
-            try 
-            {
-                ResultadoOcr ocr = executarTesseract(imagem);
-                if (!ocr.texto().isBlank() || textoEnviado == null || 
-                textoEnviado.isBlank()) 
-                {
-                    return ocr;
-                }
-                motivoFallback = "Tesseract não reconheceu texto ❌";
-            } 
-            catch (Exception e) 
-            {
-                log.warn("Tesseract indisponível: {}", e.getMessage());
-                motivoFallback = "Tesseract indisponível";
-            }
-
+            motivoDoFallback = "PDF precisa do OpenCV para virar imagem";
         }
-        if (textoEnviado != null && !textoEnviado.isBlank()) 
+        else if (imagem != null)
+        {
+            try
+            {
+                ResultadoOcr resultadoTesseract = executarTesseract(imagem);
+
+                if (!resultadoTesseract.texto().isBlank() || !recebeuTexto)
+                {
+                    return resultadoTesseract;
+                }
+
+                motivoDoFallback = "Tesseract não reconheceu texto ❌";
+            }
+            catch (Exception erro)
+            {
+                log.warn("Tesseract indisponível: {}", erro.getMessage());
+                motivoDoFallback = "Tesseract indisponível";
+            }
+        }
+
+        if (recebeuTexto)
         {
             return new ResultadoOcr(textoEnviado, CONFIANCA_TEXTO_ENVIADO,
-                    "Texto recebido em conteudoDocumento (" + motivoFallback + ")");
+                    "Texto recebido em conteudoDocumento (" + motivoDoFallback + ")");
         }
-        return new ResultadoOcr("", 0, "Nenhum texto extraído (" + motivoFallback + ")");
+
+        return new ResultadoOcr("", 0, "Nenhum texto extraído (" + motivoDoFallback + ")");
     }
 
-    private ResultadoOcr executarTesseract(ImagemTratada imagem) throws Exception 
+    private ResultadoOcr executarTesseract(ImagemTratada imagem) throws IOException, InterruptedException
     {
-        Path arquivo = Files.createTempFile("ocr-", imagem.extensao());
-        try 
+        AppProperties.Ocr configuracaoOcr = propriedades.ocr();
+        Path arquivoTemporario = Files.createTempFile("ocr-", imagem.extensao());
+
+        try
         {
-            Files.write(arquivo, imagem.conteudo());
-            List<String> comando = new ArrayList<>(List.of(props.ocr().command(), arquivo.toString(), "stdout",
-                    "-l", props.ocr().language()));
-                    
-            if (props.ocr().tessdataPath() != null && !props.ocr().tessdataPath().isBlank()
-                    && Files.isDirectory(Path.of(props.ocr().tessdataPath()))) 
+            Files.write(arquivoTemporario, imagem.conteudo());
+
+            List<String> comando = new ArrayList<>(List.of(
+                    configuracaoOcr.command(), arquivoTemporario.toString(), "stdout",
+                    "-l", configuracaoOcr.language()));
+
+            String diretorioTessdata = configuracaoOcr.tessdataPath();
+            if (diretorioTessdata != null && !diretorioTessdata.isBlank()
+                    && Files.isDirectory(Path.of(diretorioTessdata)))
             {
                 comando.add("--tessdata-dir");
-                comando.add(props.ocr().tessdataPath());
+                comando.add(diretorioTessdata);
             }
+
             comando.add("tsv");
-            ResultadoOcr resultado = lerTsv(ComandoExterno.executar(comando));
-            return new ResultadoOcr(resultado.texto(), resultado.confianca(),
-                    "Texto extraído (confiança %.0f%%)".formatted(resultado.confianca()));
-        } 
-        finally 
+
+            ResultadoOcr textoLido = lerTsv(ComandoExterno.executar(comando));
+            return new ResultadoOcr(textoLido.texto(), textoLido.confianca(),
+                    "Texto extraído (confiança %.0f%%)".formatted(textoLido.confianca()));
+        }
+        finally
         {
-            Files.deleteIfExists(arquivo);
+            Files.deleteIfExists(arquivoTemporario);
         }
     }
 
     /** Monta o texto linha a linha e calcula a confiança média das palavras. */
-    static ResultadoOcr lerTsv(String tsv) 
+    static ResultadoOcr lerTsv(String tsv)
     {
-        Map<String, StringBuilder> linhas = new LinkedHashMap<>();
-        double somaConfianca = 0;
-        int palavras = 0;
+        Map<String, StringBuilder> palavrasPorLinha = new LinkedHashMap<>();
+        double somaDasConfiancas = 0;
+        int quantidadeDePalavras = 0;
 
-        for (String linha : tsv.split("\\R")) 
+        for (String linhaTsv : tsv.split("\\R"))
         {
-            String[] col = linha.split("\t", -1);
+            String[] colunas = linhaTsv.split("\t", -1);
 
-            if (col.length < 12 || !"5".equals(col[0])) 
-            {
-                continue; // nível 5 = palavra
-            }
-
-            String palavra = col[11].strip();
-            double conf = Double.parseDouble(col[10]);
-
-            if (palavra.isEmpty() || conf < 0) 
+            if (colunas.length < TOTAL_DE_COLUNAS_TSV || !NIVEL_PALAVRA.equals(colunas[COLUNA_NIVEL]))
             {
                 continue;
             }
 
-            String chave = col[1] + "-" + col[2] + "-" + col[3] + "-" + col[4];
-            linhas.computeIfAbsent(chave, k -> new StringBuilder()).append(palavra).append(' ');
-            somaConfianca += conf;
-            palavras++;
+            String palavra = colunas[COLUNA_TEXTO].strip();
+            double confiancaDaPalavra = Double.parseDouble(colunas[COLUNA_CONFIANCA]);
+
+            if (palavra.isEmpty() || confiancaDaPalavra < 0)
+            {
+                continue;
+            }
+
+            String identificadorDaLinha = colunas[COLUNA_PAGINA] + "-" + colunas[COLUNA_BLOCO] + "-"
+                    + colunas[COLUNA_PARAGRAFO] + "-" + colunas[COLUNA_LINHA];
+
+            palavrasPorLinha.computeIfAbsent(identificadorDaLinha, chave -> new StringBuilder())
+                    .append(palavra)
+                    .append(' ');
+
+            somaDasConfiancas += confiancaDaPalavra;
+            quantidadeDePalavras++;
         }
-        String texto = String.join("\n", linhas.values().stream().map(sb -> sb.toString().strip()).toList());
-        return new ResultadoOcr(texto, palavras == 0 ? 0 : somaConfianca / palavras, null);
+
+        String texto = palavrasPorLinha.values().stream()
+                .map(linha -> linha.toString().strip())
+                .collect(Collectors.joining("\n"));
+
+        double confiancaMedia = quantidadeDePalavras == 0 ? 0 : somaDasConfiancas / quantidadeDePalavras;
+        return new ResultadoOcr(texto, confiancaMedia, null);
     }
 }

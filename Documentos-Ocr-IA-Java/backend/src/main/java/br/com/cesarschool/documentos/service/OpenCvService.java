@@ -15,73 +15,80 @@ import br.com.cesarschool.documentos.config.AppProperties;
  * Se o script não estiver disponível, segue com a imagem original.
  */
 @Service
-public class OpenCvService 
+public class OpenCvService
 {
 
     private static final Logger log = LoggerFactory.getLogger(OpenCvService.class);
 
-    public record ImagemTratada(byte[] conteudo, String extensao, boolean tratada, String descricao) 
+    private static final String EXTENSAO_IMAGEM_TRATADA = ".png";
+
+    public record ImagemTratada(byte[] conteudo, String extensao, boolean tratada, String descricao)
     {
-        public boolean isPdf() 
+        public boolean isPdf()
         {
             return ".pdf".equals(extensao);
         }
     }
 
-    private final AppProperties props;
+    private final AppProperties propriedades;
 
-    public OpenCvService(AppProperties props) 
+    public OpenCvService(AppProperties propriedades)
     {
-        this.props = props;
+        this.propriedades = propriedades;
     }
 
-    public ImagemTratada tratar(byte[] original, String extensao) 
+    public ImagemTratada tratar(byte[] conteudoOriginal, String extensao)
     {
-        String comando = props.opencv().command();
-        if (comando == null || comando.isBlank()) 
+        String comandoOpenCv = propriedades.opencv().command();
+
+        if (comandoOpenCv == null || comandoOpenCv.isBlank())
         {
-            return new ImagemTratada(original, extensao, false, "OpenCV não configurado — imagem original");
+            return new ImagemTratada(conteudoOriginal, extensao, false, "OpenCV não configurado — imagem original");
         }
-        Path entrada = null;
-        Path saida = null;
-        try 
+
+        Path arquivoEntrada = null;
+        Path arquivoSaida = null;
+
+        try
         {
-            entrada = Files.createTempFile("documento-", extensao);
-            saida = Files.createTempFile("documento-tratado-", ".png");
-            Files.write(entrada, original);
+            arquivoEntrada = Files.createTempFile("documento-", extensao);
+            arquivoSaida = Files.createTempFile("documento-tratado-", EXTENSAO_IMAGEM_TRATADA);
+            Files.write(arquivoEntrada, conteudoOriginal);
 
-            List<String> partes = ComandoExterno.dividir(comando);
-            partes.add(entrada.toString());
-            partes.add(saida.toString());
-            ComandoExterno.executar(partes);
+            List<String> comandoCompleto = ComandoExterno.separarArgumentos(comandoOpenCv);
+            comandoCompleto.add(arquivoEntrada.toString());
+            comandoCompleto.add(arquivoSaida.toString());
+            ComandoExterno.executar(comandoCompleto);
 
-            return new ImagemTratada(Files.readAllBytes(saida), ".png", true,
+            return new ImagemTratada(Files.readAllBytes(arquivoSaida), EXTENSAO_IMAGEM_TRATADA, true,
                     "Imagem tratada (cinza, ruído, binarização, inclinação)");
-        } 
-        catch (Exception e) 
+        }
+        catch (Exception erro)
         {
-            log.warn("OpenCV indisponível, seguindo com a imagem original: {}", e.getMessage());
-            return new ImagemTratada(original, extensao, false, "OpenCV indisponível — imagem original");
-        } 
-        finally 
+            log.warn("OpenCV indisponível, seguindo com a imagem original: {}", erro.getMessage());
+            return new ImagemTratada(conteudoOriginal, extensao, false, "OpenCV indisponível — imagem original");
+        }
+        finally
         {
-            apagar(entrada);
-            apagar(saida);
+            apagarArquivoTemporario(arquivoEntrada);
+            apagarArquivoTemporario(arquivoSaida);
         }
     }
 
-    private static void apagar(Path arquivo) 
+    private static void apagarArquivoTemporario(Path arquivo)
     {
-        try 
+        if (arquivo == null)
         {
-            if (arquivo != null) 
-            {
-                Files.deleteIfExists(arquivo);
-            }
-        } 
-        catch (Exception ignorado) 
+            return;
+        }
+
+        try
         {
-            // arquivo temporário
+            Files.deleteIfExists(arquivo);
+        }
+        catch (Exception ignorado)
+        {
+            // Falhar ao apagar um arquivo temporário não deve interromper a validação.
         }
     }
 }

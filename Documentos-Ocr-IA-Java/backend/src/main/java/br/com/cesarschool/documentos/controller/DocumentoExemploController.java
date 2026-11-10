@@ -13,21 +13,24 @@ import br.com.cesarschool.documentos.dto.ValidacaoRequest;
 /** Payload pronto para a demo (data de emissão sempre recente, para ser APROVADO para o cliente 1). */
 @RestController
 @RequestMapping("/api/documentos")
-public class DocumentoExemploController 
+public class DocumentoExemploController
 {
+
+    private static final int DIAS_DESDE_A_EMISSAO = 10;
+    private static final DateTimeFormatter FORMATO_DATA_BR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final Clock clock;
 
-    public DocumentoExemploController(Clock clock) 
+    public DocumentoExemploController(Clock clock)
     {
         this.clock = clock;
     }
 
     @GetMapping("/exemplo")
-    public ValidacaoRequest exemplo() 
+    public ValidacaoRequest exemplo()
     {
-        String emissao = LocalDate.now(clock).minusDays(10).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String texto = """
+        String dataEmissao = LocalDate.now(clock).minusDays(DIAS_DESDE_A_EMISSAO).format(FORMATO_DATA_BR);
+        String textoDoComprovante = """
                 CONTA DE ENERGIA
                 Empresa: Neoenergia Pernambuco
                 Titular: Joao da Silva
@@ -35,7 +38,8 @@ public class DocumentoExemploController
                 Bairro: Boa Vista
                 Cidade: Recife - PE
                 CEP: 50050-000
-                Data de emissão: %s""".formatted(emissao);
-        return new ValidacaoRequest("comprovante-residencia.pdf", "application/pdf", texto, null);
+                Data de emissão: %s""".formatted(dataEmissao);
+
+        return new ValidacaoRequest("comprovante-residencia.pdf", "application/pdf", textoDoComprovante, null);
     }
 }

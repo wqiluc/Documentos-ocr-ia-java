@@ -45,6 +45,7 @@ export default function FormularioUpload({ clientes, enviando, onEnviar }: Reado
     async function enviarFormulario(evento: FormEvent)
     {
         evento.preventDefault();
+
         if (clienteSelecionadoId === '' || !arquivoSelecionado)
         {
             return;
@@ -73,7 +74,8 @@ export default function FormularioUpload({ clientes, enviando, onEnviar }: Reado
                         className={CLASSE_CAMPO_DE_FORMULARIO}
                     >
                         {clientes.length === 0 && <option value="">Carregando clientes…</option>}
-                        {clientes.map((cliente) => (
+                        {clientes.map((cliente) => 
+                        (
                             <option key={cliente.id} value={cliente.id}>
                                 {cliente.nome} — CPF {formatarCpf(cliente.cpf)}
                             </option>
@@ -105,7 +107,7 @@ export default function FormularioUpload({ clientes, enviando, onEnviar }: Reado
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-b-lg border-t border-stone-100 bg-stone-50/70 px-5 py-3">
-                <p className="text-xs text-stone-500">A imagem passa por OpenCV e Tesseract antes da IA.</p>
+                <p className="text-xs text-stone-500">A imagem carregada passa por OpenCV e Tesseract antes da IA.</p>
                 <button type="submit" disabled={!podeEnviar || enviando} className={CLASSE_BOTAO_PRINCIPAL}>
                     {enviando ? 'Validando…' : 'Validar comprovante'}
                 </button>

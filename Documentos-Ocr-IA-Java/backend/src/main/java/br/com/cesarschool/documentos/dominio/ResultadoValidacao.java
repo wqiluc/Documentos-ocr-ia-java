@@ -60,10 +60,15 @@ public class ResultadoValidacao
     protected ResultadoValidacao() 
     {}
 
-    public ResultadoValidacao(Cliente cliente, 
-    String nomeArquivo, ComprovanteResidencia comprovante,
-    StatusValidacao status, String regrasAtendidas, String motivos, 
-    String etapas, LocalDateTime criadoEm) 
+    /** {@code regrasAtendidas}, {@code motivos} e {@code etapas} chegam já serializados em JSON. */
+    public ResultadoValidacao(Cliente cliente,
+            String nomeArquivo,
+            ComprovanteResidencia comprovante,
+            StatusValidacao status,
+            String regrasAtendidas,
+            String motivos,
+            String etapas,
+            LocalDateTime criadoEm)
     {
         this.cliente = cliente;
         this.nomeArquivo = nomeArquivo;

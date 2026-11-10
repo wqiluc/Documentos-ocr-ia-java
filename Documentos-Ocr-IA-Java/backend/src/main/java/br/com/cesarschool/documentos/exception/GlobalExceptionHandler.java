@@ -9,31 +9,32 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/** Converte as exceções da API em respostas no formato {"erro": "mensagem"}. */
 @RestControllerAdvice
-public class GlobalExceptionHandler 
+public class GlobalExceptionHandler
 {
 
     @ExceptionHandler(ClienteNaoEncontradoException.class)
-    public ResponseEntity<Map<String, String>> clienteNaoEncontrado(ClienteNaoEncontradoException e) 
+    public ResponseEntity<Map<String, String>> clienteNaoEncontrado(ClienteNaoEncontradoException excecao)
     {
-
-        return erro(HttpStatus.NOT_FOUND, e.getMessage());
+        return respostaDeErro(HttpStatus.NOT_FOUND, excecao.getMessage());
     }
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<Map<String, String>> naoEncontrado(NoSuchElementException e) 
+    public ResponseEntity<Map<String, String>> naoEncontrado(NoSuchElementException excecao)
     {
-        return erro(HttpStatus.NOT_FOUND, e.getMessage());
+        return respostaDeErro(HttpStatus.NOT_FOUND, excecao.getMessage());
     }
 
     @ExceptionHandler({IllegalArgumentException.class, HttpMessageNotReadableException.class})
-    public ResponseEntity<Map<String, String>> requisicaoInvalida(Exception e) 
+    public ResponseEntity<Map<String, String>> requisicaoInvalida(Exception excecao)
     {
-        return erro(HttpStatus.BAD_REQUEST, e.getMessage());
+        return respostaDeErro(HttpStatus.BAD_REQUEST, excecao.getMessage());
     }
 
-    private ResponseEntity<Map<String, String>> erro(HttpStatus status, String mensagem) 
+    private ResponseEntity<Map<String, String>> respostaDeErro(HttpStatus status, String mensagem)
     {
-        return ResponseEntity.status(status).body(Map.of("erro", mensagem == null ? status.getReasonPhrase() : mensagem));
+        String mensagemDeErro = mensagem == null ? status.getReasonPhrase() : mensagem;
+        return ResponseEntity.status(status).body(Map.of("erro", mensagemDeErro));
     }
 }
