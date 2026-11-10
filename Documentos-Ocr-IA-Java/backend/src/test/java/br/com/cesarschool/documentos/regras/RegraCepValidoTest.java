@@ -1,4 +1,5 @@
 package br.com.cesarschool.documentos.regras;
+
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +19,6 @@ class RegraCepValidoTest
     private final Cliente cliente = new Cliente(1L, "Joao da Silva", "52998224725");
 
     @ParameterizedTest
-
     @ValueSource(strings = {"50050-000", "50050000", " 01310-100 ", "\t12345-678\n", "01001000"})
     void aceitaCepComOitoDigitos(String cep)
     {
@@ -26,7 +26,6 @@ class RegraCepValidoTest
     }
 
     @ParameterizedTest
-
     @ValueSource(strings = {"5005-000", "500500001", "ABCDE-123", "00000-000", "50.050-000"})
     void rejeitaCepInvalido(String cep)
     {
@@ -34,7 +33,6 @@ class RegraCepValidoTest
     }
 
     @ParameterizedTest
-
     @ValueSource(strings = {"500500-00", "50050--000", "50050 000", "-50050000", "50050000-", "5005O-000", "CEP 50050-000"})
     void rejeitaCepComHifenOuCaracteresForaDoLugar(String cep)
     {
@@ -42,7 +40,6 @@ class RegraCepValidoTest
     }
 
     @ParameterizedTest
-
     @ValueSource(strings = {"11111111", "99999-999", "55555-555"})
     void rejeitaCepComTodosOsDigitosIguais(String cep)
     {
@@ -50,7 +47,6 @@ class RegraCepValidoTest
     }
 
     @ParameterizedTest
-
     @NullAndEmptySource
     @ValueSource(strings = {"   ", "\t"})
     void ignoraQuandoNaoHaCep(String cep)

@@ -19,43 +19,43 @@ import br.com.cesarschool.documentos.service.ValidacaoService;
 
 @RestController
 @RequestMapping("/api")
-public class ComprovanteController 
+public class ComprovanteController
 {
 
     private final ValidacaoService validacaoService;
     private final ClienteRepository clienteRepository;
 
-    public ComprovanteController(ValidacaoService validacaoService, ClienteRepository clienteRepository) 
+    public ComprovanteController(ValidacaoService validacaoService, ClienteRepository clienteRepository)
     {
         this.validacaoService = validacaoService;
         this.clienteRepository = clienteRepository;
     }
 
     @GetMapping("/clientes")
-    public List<Cliente> listarClientes() 
+    public List<Cliente> listarClientes()
     {
         return clienteRepository.findAll();
     }
 
     @PostMapping("/clientes/{clienteId}/comprovantes")
-    public ResponseEntity<ValidacaoResponse> enviarComprovante
-    (@PathVariable Long clienteId, @RequestBody ValidacaoRequest request) 
+    public ResponseEntity<ValidacaoResponse> enviarComprovante(@PathVariable Long clienteId,
+            @RequestBody ValidacaoRequest requisicao)
     {
-        ValidacaoResponse resposta = validacaoService.validarComprovante(clienteId, request);
+        ValidacaoResponse validacao = validacaoService.validarComprovante(clienteId, requisicao);
+        URI enderecoDaValidacao = URI.create(
+                "/api/clientes/%d/comprovantes/%d".formatted(clienteId, validacao.validacaoId()));
 
-        URI local = URI.create("/api/clientes/%d/comprovantes/%d".formatted(clienteId, resposta.validacaoId()));
-        
-        return ResponseEntity.created(local).body(resposta);
+        return ResponseEntity.created(enderecoDaValidacao).body(validacao);
     }
 
     @GetMapping("/clientes/{clienteId}/comprovantes/{validacaoId}")
-    public ValidacaoResponse consultar(@PathVariable Long clienteId, @PathVariable Long validacaoId) 
+    public ValidacaoResponse consultar(@PathVariable Long clienteId, @PathVariable Long validacaoId)
     {
         return validacaoService.buscar(clienteId, validacaoId);
     }
 
     @GetMapping("/validacoes")
-    public List<ValidacaoResponse> listarValidacoes() 
+    public List<ValidacaoResponse> listarValidacoes()
     {
         return validacaoService.listar();
     }

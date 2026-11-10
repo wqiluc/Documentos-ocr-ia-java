@@ -12,53 +12,55 @@ import br.com.cesarschool.documentos.config.AppProperties;
 import br.com.cesarschool.documentos.dominio.Cliente;
 import br.com.cesarschool.documentos.dominio.ComprovanteResidencia;
 
-/** R06 — comprovante emitido há no máximo 90 dias. */
+/** R06 — comprovante emitido há no máximo 90 dias (prazo configurável em app.regras.dias-maximos-emissao). */
 @Component
 @Order(3)
-public class RegraEmissao90Dias implements Regra 
+public class RegraEmissao90Dias implements Regra
 {
 
     static final String CODIGO = "R06";
     static final String DESCRICAO = "Emissão dentro de 90 dias";
 
     private final Clock clock;
-    private final int diasMaximos;
+    private final int prazoMaximoEmDias;
 
     @Autowired
-    public RegraEmissao90Dias(Clock clock, AppProperties props) 
+    public RegraEmissao90Dias(Clock clock, AppProperties propriedades)
     {
-        this(clock, props.regras().diasMaximosEmissao());
+        this(clock, propriedades.regras().diasMaximosEmissao());
     }
 
-    RegraEmissao90Dias(Clock clock, int diasMaximos) 
+    RegraEmissao90Dias(Clock clock, int prazoMaximoEmDias)
     {
         this.clock = clock;
-        this.diasMaximos = diasMaximos;
+        this.prazoMaximoEmDias = prazoMaximoEmDias;
     }
 
     @Override
-    public ResultadoRegra avaliar(ComprovanteResidencia comprovante, Cliente cliente) 
+    public ResultadoRegra avaliar(ComprovanteResidencia comprovante, Cliente cliente)
     {
-        LocalDate emissao = comprovante.dataEmissao();
-        if (emissao == null) 
+        LocalDate dataEmissao = comprovante.dataEmissao();
+
+        if (dataEmissao == null)
         {
-            return ResultadoRegra.ignorada(CODIGO, DESCRICAO); 
+            return ResultadoRegra.ignorada(CODIGO, DESCRICAO); // já reportado na R02
         }
 
         LocalDate hoje = LocalDate.now(clock);
-        if (emissao.isAfter(hoje)) 
+
+        if (dataEmissao.isAfter(hoje))
         {
             return ResultadoRegra.falhou(CODIGO, DESCRICAO,
-                    "Data de emissão do comprovante (%s) está no futuro. Verifique o documento.".formatted(emissao));
+                    "Data de emissão do comprovante (%s) está no futuro. Verifique o documento.".formatted(dataEmissao));
         }
 
-        long dias = ChronoUnit.DAYS.between(emissao, hoje);
-        
-        if (dias > diasMaximos) 
+        long diasDesdeAEmissao = ChronoUnit.DAYS.between(dataEmissao, hoje);
+
+        if (diasDesdeAEmissao > prazoMaximoEmDias)
         {
             return ResultadoRegra.falhou(CODIGO, DESCRICAO,
                     "Comprovante emitido há mais de %d dias (%d dias) e excedeu o prazo de %d dias❌. Envie um comprovante mais recente."
-                            .formatted(diasMaximos, dias, diasMaximos));
+                            .formatted(prazoMaximoEmDias, diasDesdeAEmissao, prazoMaximoEmDias));
         }
 
         return ResultadoRegra.atendida(CODIGO, DESCRICAO);

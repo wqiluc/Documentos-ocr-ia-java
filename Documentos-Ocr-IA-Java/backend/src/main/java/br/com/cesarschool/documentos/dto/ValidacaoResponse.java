@@ -16,7 +16,6 @@ public record ValidacaoResponse
         DadosComprovanteDto dadosExtraidos,
         Resultado resultado
 )
-
 {
 
     public record Resultado(StatusValidacao status, List<String> regrasAtendidas, List<String> motivos) 

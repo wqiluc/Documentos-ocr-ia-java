@@ -26,7 +26,6 @@ class RegraTitularIgualClienteTest
     }
 
     @ParameterizedTest
-
     @ValueSource(strings = {"João da Silva", "joão da silva", "  João da Silva  ", "JOÃO DA SILVA", "Joao\tda\nSilva", "João-da-Silva", "João da Silva."})
     void aceitaVariacoesDoMesmoNome(String titular)
     {
@@ -43,13 +42,12 @@ class RegraTitularIgualClienteTest
     @Test
     void nomeDiferenteVaiParaAnaliseManual()
     {
-        ResultadoRegra regra = this.regra.avaliar(comprovante("Maria da Silva"), cliente);
-        assertThat(regra.isFalhou()).isTrue();
-        assertThat(regra.statusSeFalhar()).isEqualTo(StatusValidacao.ANALISE_MANUAL);
+        ResultadoRegra resultado = regra.avaliar(comprovante("Maria da Silva"), cliente);
+        assertThat(resultado.isFalhou()).isTrue();
+        assertThat(resultado.statusSeFalhar()).isEqualTo(StatusValidacao.ANALISE_MANUAL);
     }
 
     @ParameterizedTest
-
     @ValueSource(strings = {"João Silva", "João Pedro da Silva", "João da Silva Filho", "Joana da Silva", "Silva da João"})
     void nomeParcialOuComPalavrasDiferentesVaiParaAnaliseManual(String titular)
     {
@@ -70,7 +68,6 @@ class RegraTitularIgualClienteTest
     }
 
     @ParameterizedTest
-
     @NullAndEmptySource
     @ValueSource(strings = {"   ", "\t\n"})
     void ignoraQuandoNaoHaTitular(String titular)
@@ -90,7 +87,6 @@ class RegraTitularIgualClienteTest
     }
 
     @ParameterizedTest
-
     @CsvSource(delimiter = '|', quoteCharacter = '"', value = 
     {
             "João da Silva|joao da silva",

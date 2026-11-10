@@ -14,32 +14,34 @@ import br.com.cesarschool.documentos.dominio.ComprovanteResidencia;
  */
 @Component
 @Order(5)
-public class RegraTitularIgualCliente implements Regra 
+public class RegraTitularIgualCliente implements Regra
 {
 
     static final String CODIGO = "R08";
     static final String DESCRICAO = "Titular igual ao cliente cadastrado";
 
     @Override
-    public ResultadoRegra avaliar(ComprovanteResidencia comprovante, Cliente cliente) 
+    public ResultadoRegra avaliar(ComprovanteResidencia comprovante, Cliente cliente)
     {
-        String titular = comprovante.nomeTitular();
-        if (titular == null || titular.isBlank()) 
+        String nomeTitular = comprovante.nomeTitular();
+
+        if (nomeTitular == null || nomeTitular.isBlank())
         {
             return ResultadoRegra.ignorada(CODIGO, DESCRICAO); // já reportado na R02
         }
 
-        if (normalizar(titular).equals(normalizar(cliente.getNome()))) 
+        if (normalizar(nomeTitular).equals(normalizar(cliente.getNome())))
         {
             return ResultadoRegra.atendida(CODIGO, DESCRICAO);
         }
 
         return ResultadoRegra.analiseManual(CODIGO, DESCRICAO,
                 "Comprovante em nome de \"%s\", diferente do cliente \"%s\". Encaminhado para análise manual."
-                        .formatted(titular.strip(), cliente.getNome()));
+                        .formatted(nomeTitular.strip(), cliente.getNome()));
     }
 
-    static String normalizar(String nome) 
+    /** Remove acentos, pontuação e espaços extras e deixa em minúsculas: "  JOÃO-da Silva." → "joao da silva". */
+    static String normalizar(String nome)
     {
         return Normalizer.normalize(nome, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "")

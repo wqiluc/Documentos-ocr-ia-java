@@ -24,41 +24,41 @@ class ValidacaoServiceTest
     @Test
     void aprovaComprovanteRecenteNoNomeDoCliente() 
     {
-        ValidacaoResponse r = service.validarComprovante(1L, request("Joao da Silva", "50050-000", 10));
+        ValidacaoResponse resposta = service.validarComprovante(1L, request("Joao da Silva", "50050-000", 10));
 
-        assertThat(r.resultado().status()).isEqualTo(StatusValidacao.APROVADO);
-        assertThat(r.resultado().motivos()).isEmpty();
-        assertThat(r.resultado().regrasAtendidas()).hasSize(5);
-        assertThat(r.dadosExtraidos().cep()).isEqualTo("50050-000");
-        assertThat(r.etapas()).hasSize(5);
+        assertThat(resposta.resultado().status()).isEqualTo(StatusValidacao.APROVADO);
+        assertThat(resposta.resultado().motivos()).isEmpty();
+        assertThat(resposta.resultado().regrasAtendidas()).hasSize(5);
+        assertThat(resposta.dadosExtraidos().cep()).isEqualTo("50050-000");
+        assertThat(resposta.etapas()).hasSize(5);
 
-        ValidacaoResponse consultado = service.buscar(1L, r.validacaoId());
+        ValidacaoResponse consultado = service.buscar(1L, resposta.validacaoId());
         assertThat(consultado.resultado().status()).isEqualTo(StatusValidacao.APROVADO);
     }
 
     @Test
     void reprovaComprovanteAntigo() 
     {
-        ValidacaoResponse r = service.validarComprovante(1L, request("Joao da Silva", "50050-000", 120));
+        ValidacaoResponse resposta = service.validarComprovante(1L, request("Joao da Silva", "50050-000", 120));
 
-        assertThat(r.resultado().status()).isEqualTo(StatusValidacao.REPROVADO);
-        assertThat(r.resultado().motivos()).anyMatch(m -> m.contains("90 dias"));
+        assertThat(resposta.resultado().status()).isEqualTo(StatusValidacao.REPROVADO);
+        assertThat(resposta.resultado().motivos()).anyMatch(motivo -> motivo.contains("90 dias"));
     }
 
     @Test
     void titularDiferenteVaiParaAnaliseManual() 
     {
-        ValidacaoResponse r = service.validarComprovante(1L, request("Carlos da Silva", "50050-000", 10));
+        ValidacaoResponse resposta = service.validarComprovante(1L, request("Carlos da Silva", "50050-000", 10));
 
-        assertThat(r.resultado().status()).isEqualTo(StatusValidacao.ANALISE_MANUAL);
+        assertThat(resposta.resultado().status()).isEqualTo(StatusValidacao.ANALISE_MANUAL);
     }
 
     @Test
     void reprovacaoTemPrioridadeSobreAnaliseManual() 
     {
-        ValidacaoResponse r = service.validarComprovante(1L, request("Carlos da Silva", "123", 10));
+        ValidacaoResponse resposta = service.validarComprovante(1L, request("Carlos da Silva", "123", 10));
 
-        assertThat(r.resultado().status()).isEqualTo(StatusValidacao.REPROVADO);
+        assertThat(resposta.resultado().status()).isEqualTo(StatusValidacao.REPROVADO);
     }
 
     @Test
@@ -68,7 +68,8 @@ class ValidacaoServiceTest
                 .isInstanceOf(ClienteNaoEncontradoException.class);
     }
 
-    private static ValidacaoRequest request(String titular, String cep, int diasAtras) {
+    private static ValidacaoRequest request(String titular, String cep, int diasAtras)
+    {
         String emissao = LocalDate.now().minusDays(diasAtras).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         String texto = """
                 CONTA DE ENERGIA

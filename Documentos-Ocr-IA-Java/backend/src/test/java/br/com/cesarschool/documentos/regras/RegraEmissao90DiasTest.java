@@ -40,7 +40,6 @@ class RegraEmissao90DiasTest
     }
 
     @ParameterizedTest
-
     @ValueSource(ints = {1, 30, 45, 89})
     void aprovaDentroDoPrazo(int diasAtras)
     {
@@ -50,13 +49,12 @@ class RegraEmissao90DiasTest
     @Test
     void reprovaComMaisDe90Dias()
     {
-        ResultadoRegra regra = this.regra.avaliar(comprovante(HOJE.minusDays(91)), cliente);
-        assertThat(regra.isFalhou()).isTrue();
-        assertThat(regra.motivo()).contains("excedeu o prazo de 90 dias❌");
+        ResultadoRegra resultado = regra.avaliar(comprovante(HOJE.minusDays(91)), cliente);
+        assertThat(resultado.isFalhou()).isTrue();
+        assertThat(resultado.motivo()).contains("excedeu o prazo de 90 dias❌");
     }
 
     @ParameterizedTest
-
     @ValueSource(ints = {92, 120, 365, 1000})
     void reprovaForaDoPrazo(int diasAtras)
     {

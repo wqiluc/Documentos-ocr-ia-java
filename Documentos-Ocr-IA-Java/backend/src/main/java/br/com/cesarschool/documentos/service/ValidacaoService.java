@@ -33,8 +33,13 @@ import br.com.cesarschool.documentos.service.OpenCvService.ImagemTratada;
 
 /** Orquestra o pipeline: Documento → OpenCV → Tesseract → IA → Regras → banco. */
 @Service
-public class ValidacaoService 
+public class ValidacaoService
 {
+
+    private static final String NOME_ARQUIVO_PADRAO = "comprovante";
+
+    private static final TypeReference<List<String>> LISTA_DE_TEXTOS = new TypeReference<>() {};
+    private static final TypeReference<List<EtapaPipeline>> LISTA_DE_ETAPAS = new TypeReference<>() {};
 
     private final ClienteRepository clienteRepository;
     private final ValidacaoRepository validacaoRepository;
@@ -45,10 +50,14 @@ public class ValidacaoService
     private final ObjectMapper objectMapper;
     private final Clock clock;
 
-    public ValidacaoService(ClienteRepository clienteRepository, 
-    ValidacaoRepository validacaoRepository, OpenCvService openCvService, 
-    OcrService ocrService, InterpretadorIaService interpretadorIaService,
-    List<Regra> regras, ObjectMapper objectMapper, Clock clock) 
+    public ValidacaoService(ClienteRepository clienteRepository,
+            ValidacaoRepository validacaoRepository,
+            OpenCvService openCvService,
+            OcrService ocrService,
+            InterpretadorIaService interpretadorIaService,
+            List<Regra> regras,
+            ObjectMapper objectMapper,
+            Clock clock)
     {
         this.clienteRepository = clienteRepository;
         this.validacaoRepository = validacaoRepository;
@@ -61,163 +70,215 @@ public class ValidacaoService
     }
 
     @Transactional
-    public ValidacaoResponse validarComprovante(Long clienteId, ValidacaoRequest request) 
+    public ValidacaoResponse validarComprovante(Long clienteId, ValidacaoRequest requisicao)
     {
         Cliente cliente = clienteRepository.findById(clienteId)
-        .orElseThrow(() -> new ClienteNaoEncontradoException(clienteId));
+                .orElseThrow(() -> new ClienteNaoEncontradoException(clienteId));
 
-        boolean temTexto = request.conteudoDocumento() != null && !request.conteudoDocumento().isBlank();
-        boolean temImagem = request.imagemBase64() != null && !request.imagemBase64().isBlank();
+        boolean enviouTexto = estaPreenchido(requisicao.conteudoDocumento());
+        boolean enviouImagem = estaPreenchido(requisicao.imagemBase64());
 
-        if (!temTexto && !temImagem) 
+        if (!enviouTexto && !enviouImagem)
         {
             throw new IllegalArgumentException("Envie conteudoDocumento (texto) e/ou imagemBase64.");
         }
 
         List<EtapaPipeline> etapas = new ArrayList<>();
-        String nomeArquivo = request.nomeArquivo() != null ? request.nomeArquivo() : "comprovante";
+
+        // 1. Documento
+        String nomeArquivo = requisicao.nomeArquivo() != null ? requisicao.nomeArquivo() : NOME_ARQUIVO_PADRAO;
         etapas.add(new EtapaPipeline(1, "Documento", nomeArquivo));
 
         // 2. OpenCV
-        ImagemTratada imagem = null;
-        if (temImagem) 
+        ImagemTratada imagemTratada = null;
+        if (enviouImagem)
         {
-            imagem = openCvService.tratar(decodificar(request.imagemBase64()), extensao(request));
-            etapas.add(new EtapaPipeline(2, "OpenCV", imagem.descricao()));
-        } 
-        else 
+            byte[] conteudoDaImagem = decodificarBase64(requisicao.imagemBase64());
+            imagemTratada = openCvService.tratar(conteudoDaImagem, identificarExtensao(requisicao));
+            etapas.add(new EtapaPipeline(2, "OpenCV", imagemTratada.descricao()));
+        }
+        else
         {
             etapas.add(new EtapaPipeline(2, "OpenCV", "Pulado — nenhuma imagem enviada"));
         }
 
         // 3. Tesseract
-        ResultadoOcr ocr = ocrService.extrair(imagem, request.conteudoDocumento());
-        etapas.add(new EtapaPipeline(3, "Tesseract", ocr.descricao()));
+        ResultadoOcr resultadoOcr = ocrService.extrair(imagemTratada, requisicao.conteudoDocumento());
+        etapas.add(new EtapaPipeline(3, "Tesseract", resultadoOcr.descricao()));
 
         // 4. IA
-        Interpretacao interpretacao = interpretadorIaService.interpretar(ocr.texto());
+        Interpretacao interpretacao = interpretadorIaService.interpretar(resultadoOcr.texto());
         etapas.add(new EtapaPipeline(4, "IA", interpretacao.descricao()));
 
         // 5. Regras
-        DadosComprovanteDto d = interpretacao.dados();
-        ComprovanteResidencia comprovante = new ComprovanteResidencia(d.nomeTitular(), d.endereco(), d.bairro(),
-                d.cidadeUf(), d.cep(), d.empresaEmissora(), d.dataEmissao(), ocr.texto(), ocr.confianca());
-        List<ResultadoRegra> resultados = regras.stream().map(r -> r.avaliar(comprovante, cliente)).toList();
-        List<String> atendidas = resultados.stream().filter(ResultadoRegra::isAtendida)
-                .map(ResultadoRegra::descricao).toList();
-        List<String> motivos = resultados.stream().filter(ResultadoRegra::isFalhou)
-                .map(ResultadoRegra::motivo).toList();
-        StatusValidacao status = statusFinal(resultados);
-        etapas.add(new EtapaPipeline(5, "Regras", "%d de %d regras atendidas".formatted(atendidas.size(), regras.size())));
+        ComprovanteResidencia comprovante = montarComprovante(interpretacao.dados(), resultadoOcr);
+        List<ResultadoRegra> resultadosDasRegras = regras.stream()
+                .map(regra -> regra.avaliar(comprovante, cliente))
+                .toList();
+
+        List<String> regrasAtendidas = resultadosDasRegras.stream()
+                .filter(ResultadoRegra::isAtendida)
+                .map(ResultadoRegra::descricao)
+                .toList();
+
+        List<String> motivos = resultadosDasRegras.stream()
+                .filter(ResultadoRegra::isFalhou)
+                .map(ResultadoRegra::motivo)
+                .toList();
+
+        StatusValidacao status = statusFinal(resultadosDasRegras);
+        etapas.add(new EtapaPipeline(5, "Regras",
+                "%d de %d regras atendidas".formatted(regrasAtendidas.size(), regras.size())));
 
         // 6. Banco
-        ResultadoValidacao salvo = validacaoRepository.save(new ResultadoValidacao(cliente, nomeArquivo, comprovante,
-                status, json(atendidas), json(motivos), json(etapas), LocalDateTime.now(clock)));
-        return paraResponse(salvo);
+        ResultadoValidacao validacaoSalva = validacaoRepository.save(new ResultadoValidacao(
+                cliente, nomeArquivo, comprovante, status,
+                paraJson(regrasAtendidas), paraJson(motivos), paraJson(etapas),
+                LocalDateTime.now(clock)));
+
+        return paraResponse(validacaoSalva);
     }
 
     @Transactional(readOnly = true)
-    public ValidacaoResponse buscar(Long clienteId, Long validacaoId) 
+    public ValidacaoResponse buscar(Long clienteId, Long validacaoId)
     {
         return validacaoRepository.findByIdAndClienteId(validacaoId, clienteId)
-        .map(this::paraResponse)
-        .orElseThrow(() -> new NoSuchElementException(
-    "Validação " + validacaoId + " não encontrada para o cliente " + clienteId + "."));
+                .map(this::paraResponse)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Validação " + validacaoId + " não encontrada para o cliente " + clienteId + "."));
     }
 
     @Transactional(readOnly = true)
-    public List<ValidacaoResponse> listar() 
+    public List<ValidacaoResponse> listar()
     {
-        return validacaoRepository.findAllByOrderByCriadoEmDesc().stream().map(this::paraResponse).toList();
+        return validacaoRepository.findAllByOrderByCriadoEmDesc().stream()
+                .map(this::paraResponse)
+                .toList();
     }
 
     /** Qualquer falha que reprova → REPROVADO; senão, alguma falha → ANALISE_MANUAL; senão APROVADO. */
-    static StatusValidacao statusFinal(List<ResultadoRegra> resultados) 
+    static StatusValidacao statusFinal(List<ResultadoRegra> resultadosDasRegras)
     {
-        List<StatusValidacao> falhas = resultados.stream().
-        filter(ResultadoRegra::isFalhou)
-        .map(ResultadoRegra::statusSeFalhar).toList();
+        List<StatusValidacao> statusDasFalhas = resultadosDasRegras.stream()
+                .filter(ResultadoRegra::isFalhou)
+                .map(ResultadoRegra::statusSeFalhar)
+                .toList();
 
-        if (falhas.contains(StatusValidacao.REPROVADO)) 
+        if (statusDasFalhas.contains(StatusValidacao.REPROVADO))
         {
             return StatusValidacao.REPROVADO;
         }
 
-        if (falhas.contains(StatusValidacao.ANALISE_MANUAL)) 
+        if (statusDasFalhas.contains(StatusValidacao.ANALISE_MANUAL))
         {
-        return StatusValidacao.ANALISE_MANUAL;
+            return StatusValidacao.ANALISE_MANUAL;
         }
 
         return StatusValidacao.APROVADO;
     }
 
-    private ValidacaoResponse paraResponse(ResultadoValidacao v) 
+    private static ComprovanteResidencia montarComprovante(DadosComprovanteDto dadosExtraidos, ResultadoOcr resultadoOcr)
     {
-        return new ValidacaoResponse(
-                v.getId(),
-                v.getCliente().getId(),
-                v.getCliente().getNome(),
-                v.getNomeArquivo(),
-                v.getCriadoEm(),
-                lerJson(v.getEtapas(), new TypeReference<List<EtapaPipeline>>() {}),
-                new DadosComprovanteDto(v.getNomeTitular(), v.getEndereco(), v.getBairro(), v.getCidadeUf(),
-                v.getCep(), v.getEmpresaEmissora(), v.getDataEmissao()),
-                new ValidacaoResponse.Resultado(v.getStatus(),
-                lerJson(v.getRegrasAtendidas(), new TypeReference<List<String>>() {}),
-                lerJson(v.getMotivos(), new TypeReference<List<String>>() {})));
+        return new ComprovanteResidencia(
+                dadosExtraidos.nomeTitular(),
+                dadosExtraidos.endereco(),
+                dadosExtraidos.bairro(),
+                dadosExtraidos.cidadeUf(),
+                dadosExtraidos.cep(),
+                dadosExtraidos.empresaEmissora(),
+                dadosExtraidos.dataEmissao(),
+                resultadoOcr.texto(),
+                resultadoOcr.confianca());
     }
 
-    private static byte[] decodificar(String base64) 
+    private ValidacaoResponse paraResponse(ResultadoValidacao validacao)
     {
-        String limpo = base64.contains(",") ? base64.substring(base64.indexOf(',') + 1) : base64;
-        try 
+        DadosComprovanteDto dadosExtraidos = new DadosComprovanteDto(
+                validacao.getNomeTitular(),
+                validacao.getEndereco(),
+                validacao.getBairro(),
+                validacao.getCidadeUf(),
+                validacao.getCep(),
+                validacao.getEmpresaEmissora(),
+                validacao.getDataEmissao());
+
+        ValidacaoResponse.Resultado resultado = new ValidacaoResponse.Resultado(
+                validacao.getStatus(),
+                lerJson(validacao.getRegrasAtendidas(), LISTA_DE_TEXTOS),
+                lerJson(validacao.getMotivos(), LISTA_DE_TEXTOS));
+
+        return new ValidacaoResponse(
+                validacao.getId(),
+                validacao.getCliente().getId(),
+                validacao.getCliente().getNome(),
+                validacao.getNomeArquivo(),
+                validacao.getCriadoEm(),
+                lerJson(validacao.getEtapas(), LISTA_DE_ETAPAS),
+                dadosExtraidos,
+                resultado);
+    }
+
+    private static boolean estaPreenchido(String valor)
+    {
+        return valor != null && !valor.isBlank();
+    }
+
+    /** Aceita base64 puro ou no formato data URL ("data:image/png;base64,..."). */
+    private static byte[] decodificarBase64(String imagemBase64)
+    {
+        String conteudoBase64 = imagemBase64.contains(",")
+                ? imagemBase64.substring(imagemBase64.indexOf(',') + 1)
+                : imagemBase64;
+
+        try
         {
-            return Base64.getMimeDecoder().decode(limpo);
-        } 
-        catch (IllegalArgumentException e) 
+            return Base64.getMimeDecoder().decode(conteudoBase64);
+        }
+        catch (IllegalArgumentException erro)
         {
             throw new IllegalArgumentException("imagemBase64 não é um base64 válido.");
         }
     }
 
-    private static String extensao(ValidacaoRequest r) 
+    private static String identificarExtensao(ValidacaoRequest requisicao)
     {
-        String mime = r.mimeType() == null ? "" : r.mimeType().toLowerCase();
-        String nome = r.nomeArquivo() == null ? "" : r.nomeArquivo().toLowerCase();
+        String mimeType = requisicao.mimeType() == null ? "" : requisicao.mimeType().toLowerCase();
+        String nomeArquivo = requisicao.nomeArquivo() == null ? "" : requisicao.nomeArquivo().toLowerCase();
 
-        if (mime.contains("pdf") || nome.endsWith(".pdf")) 
+        if (mimeType.contains("pdf") || nomeArquivo.endsWith(".pdf"))
         {
-        return ".pdf";
+            return ".pdf";
         }
 
-        if (mime.contains("png") || nome.endsWith(".png")) 
+        if (mimeType.contains("png") || nomeArquivo.endsWith(".png"))
         {
             return ".png";
         }
+
         return ".jpg";
     }
 
-    private String json(Object valor) 
+    private String paraJson(Object valor)
     {
-        try 
+        try
         {
             return objectMapper.writeValueAsString(valor);
-        } 
-        catch (JsonProcessingException e) 
+        }
+        catch (JsonProcessingException erro)
         {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException(erro);
         }
     }
 
-    private <T> T lerJson(String json, TypeReference<T> tipo) 
+    private <T> T lerJson(String json, TypeReference<T> tipo)
     {
-        try 
+        try
         {
             return objectMapper.readValue(json, tipo);
-        } 
-        catch (JsonProcessingException e) 
+        }
+        catch (JsonProcessingException erro)
         {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException(erro);
         }
     }
 }

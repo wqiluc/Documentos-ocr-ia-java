@@ -11,7 +11,7 @@ import br.com.cesarschool.documentos.dominio.ComprovanteResidencia;
 /** R01 — o OCR retornou texto suficiente e com boa confiança. */
 @Component
 @Order(1)
-public class RegraLegibilidade implements Regra 
+public class RegraLegibilidade implements Regra
 {
 
     static final String CODIGO = "R01";
@@ -21,34 +21,35 @@ public class RegraLegibilidade implements Regra
     private final int caracteresMinimos;
 
     @Autowired
-    public RegraLegibilidade(AppProperties props) 
+    public RegraLegibilidade(AppProperties propriedades)
     {
-        this(props.regras().confiancaMinima(), props.regras().caracteresMinimos());
+        this(propriedades.regras().confiancaMinima(), propriedades.regras().caracteresMinimos());
     }
 
-    RegraLegibilidade(double confiancaMinima, int caracteresMinimos) 
+    RegraLegibilidade(double confiancaMinima, int caracteresMinimos)
     {
         this.confiancaMinima = confiancaMinima;
         this.caracteresMinimos = caracteresMinimos;
     }
 
     @Override
-    public ResultadoRegra avaliar(ComprovanteResidencia comprovante, Cliente cliente) 
+    public ResultadoRegra avaliar(ComprovanteResidencia comprovante, Cliente cliente)
     {
-        String texto = comprovante.textoOcr() == null ? "" : comprovante.textoOcr().strip();
+        String textoReconhecido = comprovante.textoOcr() == null ? "" : comprovante.textoOcr().strip();
 
-        if (texto.length() < caracteresMinimos) 
+        if (textoReconhecido.length() < caracteresMinimos)
         {
             return ResultadoRegra.falhou(CODIGO, DESCRICAO,
                     "Documento ilegível: pouco texto foi reconhecido. Envie uma foto nítida, bem iluminada e sem cortes.");
         }
 
-        if (comprovante.confiancaOcr() < confiancaMinima) 
+        if (comprovante.confiancaOcr() < confiancaMinima)
         {
             return ResultadoRegra.falhou(CODIGO, DESCRICAO,
-            "Documento ilegível: confiança do OCR de %.0f%% (mínimo %.0f%%). Envie uma imagem mais nítida."
-            .formatted(comprovante.confiancaOcr(), confiancaMinima));
+                    "Documento ilegível: confiança do OCR de %.0f%% (mínimo %.0f%%). Envie uma imagem mais nítida."
+                            .formatted(comprovante.confiancaOcr(), confiancaMinima));
         }
+
         return ResultadoRegra.atendida(CODIGO, DESCRICAO);
     }
 }

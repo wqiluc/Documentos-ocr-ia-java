@@ -6,38 +6,41 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-final class ComandoExterno 
+/** Executa programas externos (Tesseract, script do OpenCV) e devolve a saída padrão. */
+final class ComandoExterno
 {
 
-    private static final long TIMEOUT_SEGUNDOS = 60;
+    private static final long TEMPO_LIMITE_EM_SEGUNDOS = 60;
 
-    private ComandoExterno() 
-    {
+    private ComandoExterno()
+    {}
 
-    }
-
-    static List<String> dividir(String comando) 
+    /** Separa um comando configurado (ex.: "python3 scripts/x.py") em argumentos. A lista devolvida é mutável. */
+    static List<String> separarArgumentos(String comando)
     {
         return new ArrayList<>(List.of(comando.strip().split("\\s+")));
     }
 
-    static String executar(List<String> comando) throws IOException, InterruptedException 
+    static String executar(List<String> comando) throws IOException, InterruptedException
     {
-        Process processo = new ProcessBuilder(comando).redirectErrorStream(false).start();
-        byte[] saida = processo.getInputStream().readAllBytes();
-        byte[] erro = processo.getErrorStream().readAllBytes();
+        String programa = comando.get(0);
+        Process processo = new ProcessBuilder(comando).start();
 
-        if (!processo.waitFor(TIMEOUT_SEGUNDOS, TimeUnit.SECONDS)) 
+        byte[] saidaPadrao = processo.getInputStream().readAllBytes();
+        byte[] saidaDeErro = processo.getErrorStream().readAllBytes();
+
+        if (!processo.waitFor(TEMPO_LIMITE_EM_SEGUNDOS, TimeUnit.SECONDS))
         {
             processo.destroyForcibly();
-            throw new IOException("Tempo esgotado executando " + comando.get(0));
+            throw new IOException("Tempo esgotado executando " + programa);
         }
 
-        if (processo.exitValue() != 0) 
+        if (processo.exitValue() != 0)
         {
-            throw new IOException(comando.get(0) + " terminou com código " + processo.exitValue() + ": "
-                    + new String(erro, StandardCharsets.UTF_8).strip());
+            throw new IOException(programa + " terminou com código " + processo.exitValue() + ": "
+                    + new String(saidaDeErro, StandardCharsets.UTF_8).strip());
         }
-        return new String(saida, StandardCharsets.UTF_8);
+
+        return new String(saidaPadrao, StandardCharsets.UTF_8);
     }
 }
