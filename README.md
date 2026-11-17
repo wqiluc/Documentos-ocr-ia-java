@@ -8,7 +8,7 @@ width="30">🤖<br>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg)](https://github.com/wqiluc/Documentos-ocr-ia-java/blob/main/LICENSE)
 ![Version](https://img.shields.io/badge/version-1.0.0--SNAPSHOT-purple)
-![Status](https://img.shields.io/badge/status-MVP_em_desenvolvimento-blue)
+![Status](https://img.shields.io/badge/status-Concluído-22C55E)
 </h1>
 
 <p align="center">
@@ -18,7 +18,7 @@ o cliente envia o documento de identificação (RG/CNH) e o comprovante de resid
 informando o motivo.
 </p>
 
-> 🚧 **Status:** MVP do comprovante de residência implementado (backend Spring Boot + frontend React). A API sobe com
+> ✅ **Status:** projeto concluído — validação do comprovante de residência entregue (backend Spring Boot + frontend React). A API sobe com
 > **H2 em memória** por padrão; PostgreSQL é opcional. Coleção do Postman/Insomnia em [`postman/`](postman/) e contrato
 > OpenAPI em [`docs/openapi.yaml`](docs/openapi.yaml).
 
@@ -392,17 +392,17 @@ Hibernate fica em `ddl-auto=validate`.
 <img src="https://img.shields.io/badge/-3_rotas-111827?style=flat&logo=reactrouter&logoColor=CA4245" height="22"/>
 </h2>
 
-Fluxo completo com o cliente **Joao da Silva** e o arquivo [`pdf/conta-luz-exemplo.png`](pdf/conta-luz-exemplo.png).
+Fluxo completo com o cliente **Joao da Silva** e o arquivo [`img/conta-luz-exemplo.png`](img/conta-luz-exemplo.png).
 
-| <img src="./pdf/tela-novo-envio.png" alt="Tela de novo envio" width="380"/> | <img src="./pdf/tela-novo-envio-arquivo-selecionado.png" alt="Novo envio com arquivo selecionado" width="380"/> |
+| <img src="./img/tela-novo-envio.png" alt="Tela de novo envio" width="380"/> | <img src="./img/tela-novo-envio-arquivo-selecionado.png" alt="Novo envio com arquivo selecionado" width="380"/> |
 | :---: | :---: |
 | 1️⃣ Novo envio (`/`) — escolha do cliente e do comprovante | 2️⃣ Arquivo selecionado, com a prévia antes de validar |
 
-| <img src="./pdf/tela-resultado-validacao-aprovado.png" alt="Resultado da validação aprovado" width="560"/> |
+| <img src="./img/tela-resultado-validacao-aprovado.png" alt="Resultado da validação aprovado" width="560"/> |
 | :---: |
 | 3️⃣ Resultado (`/resultado/:clienteId/:validacaoId`) — dados extraídos, regras R01–R08 e timeline das 6 etapas |
 
-| <img src="./pdf/tela-historico-vazio.png" alt="Histórico sem validações" width="380"/> | <img src="./pdf/tela-historico-com-validacao.png" alt="Histórico com uma validação" width="380"/> |
+| <img src="./img/tela-historico-vazio.png" alt="Histórico sem validações" width="380"/> | <img src="./img/tela-historico-com-validacao.png" alt="Histórico com uma validação" width="380"/> |
 | :---: | :---: |
 | 4️⃣ Histórico (`/validacoes`) ainda vazio | 5️⃣ Histórico com a validação aprovada |
 
@@ -651,11 +651,12 @@ Documentos-ocr-ia-java📄🔍/
 │   └── Documentos-OCR-IA.postman_collection.json <img src="https://img.shields.io/badge/-7_requests_·_3_cenários_·_variáveis-111827?style=flat&logo=postman&logoColor=FF6C37" height="18"/>
 │
 ├── pdf <img src="https://img.shields.io/badge/-PDF-111827?style=flat-square&logo=adobeacrobatreader&logoColor=EC1C24" height="18"/>/
-│   ├── respostas_validacao_documentos_Paguetti.pdf <img src="https://img.shields.io/badge/-Especificação_entregue-111827?style=flat&logo=adobeacrobatreader&logoColor=EC1C24" height="18"/>
-│   ├── conta-luz-exemplo.png <img src="https://img.shields.io/badge/-Comprovante_de_teste-111827?style=flat&logo=image&logoColor=white" height="18"/>
-│   └── tela-*.png <img src="https://img.shields.io/badge/-Capturas_do_frontend-111827?style=flat&logo=react&logoColor=61DAFB" height="18"/>
+│   └── respostas_validacao_documentos_Paguetti.pdf <img src="https://img.shields.io/badge/-Especificação_entregue-111827?style=flat&logo=adobeacrobatreader&logoColor=EC1C24" height="18"/>
 │
 ├── img <img src="https://img.shields.io/badge/-Assets-green?style=flat&logo=image&logoColor=white" height="18"/>/
+│   ├── conta-luz-exemplo.png <img src="https://img.shields.io/badge/-Comprovante_de_teste-111827?style=flat&logo=image&logoColor=white" height="18"/>
+│   ├── conta-*.png <img src="https://img.shields.io/badge/-Contas_de_exemplo_dos_clientes_1–7-111827?style=flat&logo=image&logoColor=white" height="18"/>
+│   └── tela-*.png <img src="https://img.shields.io/badge/-Capturas_do_frontend-111827?style=flat&logo=react&logoColor=61DAFB" height="18"/>
 │
 ├── .gitignore <img src="https://img.shields.io/badge/-GitIgnore-111827?style=flat&logo=git&logoColor=F05032" height="18"/>
 ├── LICENSE <img src="https://img.shields.io/badge/License-MIT-FF8C00?style=flat&logo=opensource&logoColor=white" height="18"/>
